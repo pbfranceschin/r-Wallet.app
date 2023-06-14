@@ -3,6 +3,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import StoreIcon from '@mui/icons-material/Store';
 import { Avatar, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import { WavingHandRounded } from '@mui/icons-material';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 
@@ -57,6 +58,19 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
           />
         </Avatar>
         <Typography variant="button">Send</Typography>
+      </Stack>
+      <Stack
+        justifyContent="center"
+        alignItems="center"
+        spacing={'4px'}
+        sx={{ cursor: 'pointer' }}
+      >
+        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+          <WavingHandRounded
+            onClick={() => navigate('/release-asset')}
+          />
+        </Avatar>
+        <Typography variant="button">Release</Typography>
       </Stack>
       <Tooltip title="Coming soon">
         <Stack
