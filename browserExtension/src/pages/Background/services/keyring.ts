@@ -4,7 +4,7 @@ import MainServiceManager from './main';
 import { ServiceLifecycleEvents } from './types';
 import * as encryptor from '@metamask/browser-passworder';
 import { Provider } from '@ethersproject/providers';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, providers } from 'ethers';
 import { AccountApiType } from '../../Account/account-api/types';
 import {
   AccountImplementations,
@@ -18,6 +18,11 @@ import { DomainName, URI } from '../types/common';
 import { EVMNetwork } from '../types/network';
 import { EthersTransactionRequest } from './types';
 import { UserOperationStruct } from '@account-abstraction/contracts';
+import * as entryPointData from './EntryPoint.json';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: __dirname+'../../../../.env' });
+
+
 
 interface Events extends ServiceLifecycleEvents {
   createPassword: string;
@@ -357,17 +362,67 @@ export default class KeyringService extends BaseService<Events> {
     return keyring.signUserOpWithContext(userOp, context);
   };
 
+  // sendUserOp = async (
+  //   address: string,
+  //   userOp: UserOperationStruct
+  // ): Promise<string | null> => {
+  //   if (this.bundler) {
+  //     const userOpHash = await this.bundler.sendUserOpToBundler(userOp);
+  //     const keyring = this.keyrings[address];
+  //     return await keyring.getUserOpReceipt(userOpHash);
+  //   }
+  //   return null;
+  // };
+
+
+// Assume PRIVATE_KEY, ENTRY_POINT_ADDRESS, and PROVIDER are defined somewhere else
+
   sendUserOp = async (
     address: string,
     userOp: UserOperationStruct
   ): Promise<string | null> => {
-    if (this.bundler) {
-      const userOpHash = await this.bundler.sendUserOpToBundler(userOp);
-      const keyring = this.keyrings[address];
-      return await keyring.getUserOpReceipt(userOpHash);
-    }
-    return null;
+    // const providerURL = process.env.INFURA_URL;
+    // const pkey = process.env.PRIVATE_KEY;
+    // const entryPoint = process.env.ENTRY_POINT;
+    const providerURL = 'https://sepolia.infura.io/v3/c44125ff3ee1413eb99bf8a4b5b18e61';
+    const pkey = 'f02d097a4059c83f459856e8455f63ad8fc1b260ba35871ac03d60e94304712c';
+    const _entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
+    console.log('teste11111')
+    if(!providerURL || !pkey || !_entryPoint) throw new Error("keyring sendUserOp: mising env")
+    const provider = new ethers.providers.JsonRpcProvider(providerURL);
+    const wallet = new ethers.Wallet(pkey, provider);
+    const _entryPointInterface = new ethers.utils.Interface([
+      'function handleOps(UserOperation[] calldata ops, address payable beneficiary) external payable',
+    ]);
+    // const values: ReadonlyArray<any> = [[userOp], wallet.address];
+    // const data = _entryPointInterface.encodeFunctionData('handleOps', values);
+
+    const contract = new ethers.Contract(_entryPoint, entryPointData.abi, wallet);
+    const tx = await contract.handleOps([userOp], wallet.address);
+    const receipt = await tx.wait();
+    return receipt.transactionHash;
+    // const transaction: providers.TransactionRequest = {
+    //   to: entryPoint,
+    //   data: data,
+    //   value: ethers.utils.parseEther('0'), // Set the value as needed
+    // };
+  
+    // Estimate the gas limit
+    // transaction.gasLimit = await wallet.estimateGas(transaction);
+  
+    // Sign the transaction with the wallet
+    // const signedTransaction = await wallet.signTransaction(transaction);
+  
+    // Send the transaction
+    // const txResponse = await provider.sendTransaction(signedTransaction);
+  
+    // Wait for the transaction to be mined
+    // const txReceipt = await txResponse.wait();
+  
+    // Return the transaction hash
+    // return txReceipt.transactionHash;
   };
+  
 
   createUnsignedUserOp = async (
     address: string,
