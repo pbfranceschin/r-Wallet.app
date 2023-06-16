@@ -385,7 +385,7 @@ export default class KeyringService extends BaseService<Events> {
     // const pkey = process.env.PRIVATE_KEY;
     // const entryPoint = process.env.ENTRY_POINT;
     const providerURL = 'https://sepolia.infura.io/v3/c44125ff3ee1413eb99bf8a4b5b18e61';
-    const pkey = 'f02d097a4059c83f459856e8455f63ad8fc1b260ba35871ac03d60e94304712c';
+    const pkey = 'pkey';
     const _entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
     console.log('teste11111')
     if(!providerURL || !pkey || !_entryPoint) throw new Error("keyring sendUserOp: mising env")
