@@ -1,7 +1,13 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import { ethers } from 'hardhat';
+import * as NFT from '../artifacts/contracts/samples/NFT.sol/NFT.json';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
 
+const pkey = process.env.PRIVATE_KEY;
+const apikey = process.env.INFURA_API_KEY;
+const walletAddress = '0x6711645aB591f86B31CC97667f393A78d01f5Ca0';
 const feeBase = 1000;
 const feeMul = 3;
 const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
@@ -12,11 +18,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  await deploy('RWalletFactory', {
-    from: deployer,
-    args: [entryPoint],
-    log: true,
-  });
+  // await deploy('RWalletFactory', {
+  //   from: deployer,
+  //   args: [entryPoint],
+  //   log: true,
+  // });
 
   // const RWalletFactory = await deployments.get('RWalletFactory');
   // const RWalletFactoryAddress = RWalletFactory.address;
@@ -31,12 +37,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   //   log: true
   // });
 
-  // await deploy('NFT', {
-  //   from: deployer,
-  //   args: [],
-  //   log: true,
-  // });
+  if(!pkey || !apikey) throw new Error('missing enviroment');
+  await deploy('NFT', {
+    from: deployer,
+    args: [],
+    log: true,
+  });
 
+  const [owner] = await ethers.getSigners();
+  const provider = new ethers.providers.InfuraProvider("sepolia", apikey);
+  const signer = new ethers.Wallet(pkey, provider);
+  const NFTaddress = (await deployments.get('NFT')).address;
+  const NFTcontract = new ethers.Contract(
+    NFTaddress,
+    NFT.abi,
+    signer
+  );
+  console.log('\nminting...');
+  const tx = await NFTcontract.safeMint(walletAddress);
+  const receipt = await tx.wait();
+  const mintEvent = receipt.events?.find(
+    (event: any) => event.event === 'Transfer'
+);
+  const tokenId = mintEvent?.args?.tokenId;
+  console.log(`\nmint tx: ${receipt.transactionHash}`); 
+  const nftOwner = await NFTcontract.ownerOf(tokenId);
+  console.log(nftOwner == walletAddress);
+  
   // const [owner, dummy] = await ethers.getSigners();
   // // console.log('\ndeployer = owner:', deployer === owner.address);
   // const nft = await deployments.get('NFT');
