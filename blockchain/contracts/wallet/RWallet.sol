@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-
+import "../samples/MarketPlace.sol";
 import "../core/BaseAccount.sol";
 import "../samples/callback/TokenCallbackHandler.sol";
 
@@ -34,7 +34,7 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
     bytes4 private constant APPROVE_SEL = bytes4(keccak256(bytes("approve(address,uint256)")));
 
     bytes4 private constant APPROVE_ALL_SEL = bytes4(keccak256(bytes("setApprovalForAll(address,bool)")));
-
+    
     bytes private constant EMPTY = bytes("");
     
     IEntryPoint private immutable _entryPoint;
@@ -53,7 +53,9 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
     NFT[] private _loans;
 
     mapping(address =>  NFT[]) private _loansByContract;
-    
+
+    mapping(address => uint256) private _operatorCount;
+
     modifier onlyOwner() {
         _onlyOwner();
         _;
@@ -141,10 +143,27 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
      * if there are enough assets marked in the _loansByContract list will reach gas limit
      * in such cases releaseAsset methods should be called
      */
-    function _beforeCallCheck(address target, bytes memory data) private view returns(bool) {
+    function _beforeCallCheck(address target, bytes memory data) private returns(bool) {
         if (data.length < 4) return true;
         bytes4 funcSel = _extractFunctionSignature(data);
-        if(funcSel == APPROVE_ALL_SEL) return false;
+        if(funcSel == APPROVE_ALL_SEL){
+            if(_loansByContract[target].length > 0) return false;
+            bool approved;
+            assembly {
+                approved := mload(add(data, 68))
+            }
+            if(approved) _operatorCount[target]++;
+            else {
+                address operator;
+                assembly{
+                    operator := mload(add(data, 36))
+                }
+                if(!approved) {
+                    if(_isApprovedForAll(target, operator)) _operatorCount[target]--;
+                }
+            }
+            return true;
+        }
         if(
             funcSel == TRANSFER_SEL ||
             funcSel == SAFE_TRANSFER_SEL ||
@@ -192,7 +211,15 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
 
 
     function getLoans() external view returns(NFT[] memory) {
-        return _loans;
+        // return _loans;
+    }
+
+    function getLoansByContract(address contract_) external view returns(NFT[] memory) {
+        return _loansByContract[contract_];
+    }
+
+    function getOperatorCount(address contract_) public view returns(uint256) {
+        return _operatorCount[contract_];
     }
 
     /**
@@ -208,7 +235,7 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
             block.timestamp,
             block.timestamp + duration
         );
-        _loans.push(newAsset);
+        // _loans.push(newAsset);
         _loansByContract[_contract].push(newAsset);
     }
 
@@ -218,26 +245,29 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
      * should be called by owner in case loans make operations reach gas limit.
      * this might happen because `_isLoan` needs to be called at every userOp
      */
-    function releaseSingleAsset(uint256 index) public onlyOwner {
-        _releaseAsset(index);
+    function releaseSingleAsset(address contract_, uint256 index) public onlyOwner {
+        _releaseAsset(contract_, index);
     }
 
-    function releaseMultipleAssets(uint256[] memory indexes) public onlyOwner {
-        for(uint256 i=0; i<indexes.length; i++) {
-            _releaseAsset(indexes[i]);
-        }
-    }
+    // function releaseMultipleAssets(uint256[] memory indexes) public onlyOwner {
+    //     for(uint256 i=0; i<indexes.length; i++) {
+    //         _releaseAsset(indexes[i]);
+    //     }
+    // }
 
-    function _releaseAsset(uint256 index) private {
-        IERC721 nftContract = IERC721(_loans[index].contract_);
-        nftContract.safeTransferFrom(address(this), _loans[index].lender, _loans[index].id);
-        _subAssetFromList(index);
+    function _releaseAsset(address contract_, uint256 index) private {
+        IERC721 nftContract = IERC721(_loansByContract[contract_][index].contract_);
+        nftContract.safeTransferFrom(
+            address(this),
+            _loansByContract[contract_][index].lender,
+            _loansByContract[contract_][index].id);
+        _subAssetFromList(contract_, index);
     }
     
-    function _subAssetFromList(uint256 index) private returns(uint256) {
-        uint256 lastIndex = _loans.length -1;
-        _loans[index] = _loans[lastIndex];
-        _loans.pop();
+    function _subAssetFromList(address contract_, uint256 index) private returns(uint256) {
+        uint256 lastIndex = _loansByContract[contract_].length -1;
+        _loansByContract[contract_][index] = _loansByContract[contract_][lastIndex];
+        _loansByContract[contract_].pop();
         return lastIndex;
     }
 
@@ -245,9 +275,12 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
      * @dev allows any caller to pull asset back to original owner in exchange for a fee
      * checks if assest is a loan and if loan end time was reached
      */
-    function pullAsset(uint256 index) external {
-        require(block.timestamp > _loans[index].endTime, "Loan duration not reached");
-        _releaseAsset(index);
+    function pullAsset(address contract_, uint256 index) external {
+        require(
+            block.timestamp > _loansByContract[contract_][index].endTime,
+            "Loan duration not reached"
+        );
+        _releaseAsset(contract_, index);
     }
 
     // check: gas efficient alternatives
@@ -261,6 +294,11 @@ contract RWallet is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initiali
     function _isApproved(address contract_, uint256 tokenId) private view returns(bool) {
         IERC721 nftContract = IERC721(contract_);
         return nftContract.getApproved(tokenId) != address(0);
+    }
+
+    function _isApprovedForAll(address contract_, address operator) private view returns(bool) {
+        IERC721 nftContract = IERC721(contract_);
+        return nftContract.isApprovedForAll(address(this), operator);
     }
 
 
