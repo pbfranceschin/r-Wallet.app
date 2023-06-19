@@ -61,6 +61,21 @@ const config: HardhatUserConfig = {
       chainId: 11155111,
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_SEPOLIA_API_KEY}`,
       accounts: [`${process.env.PRIVATE_KEY}`]
+    },
+    aurora_mainnet: {
+      url: `https://mainnet.aurora.dev/${process.env.AURORA_PLUS_KEY}`,
+      accounts: [`${process.env.PRIVATE_KEY}`],
+      chainId: 1313161554
+    },
+    aurora_testnet: {
+      url: 'https://testnet.aurora.dev',
+      accounts: [`0x${process.env.PRIVATE_KEY}`],
+      chainId: 1313161555
+    },
+    aurora_hack_silo: {
+      url: 'https://hackathon.aurora.dev',
+      accounts: [`${process.env.PRIVATE_KEY}`],
+      chainId: 1313161558
     }
   },
 
