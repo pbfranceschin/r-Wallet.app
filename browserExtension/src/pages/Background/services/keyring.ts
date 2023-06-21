@@ -19,9 +19,11 @@ import { EVMNetwork } from '../types/network';
 import { EthersTransactionRequest } from './types';
 import { UserOperationStruct } from '@account-abstraction/contracts';
 import * as entryPointData from './EntryPoint.json';
+import * as contractData from '../../../../contracts/hardhat_contracts.json';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname+'../../../../.env' });
 
+import config from '../../../exconfig';
 
 
 interface Events extends ServiceLifecycleEvents {
@@ -384,23 +386,60 @@ export default class KeyringService extends BaseService<Events> {
     // const providerURL = process.env.INFURA_URL;
     // const pkey = process.env.PRIVATE_KEY;
     // const entryPoint = process.env.ENTRY_POINT;
-    const providerURL = 'https://sepolia.infura.io/v3/c44125ff3ee1413eb99bf8a4b5b18e61';
-    const pkey = 'pkey';
-    const _entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
-    console.log('teste11111')
-    if(!providerURL || !pkey || !_entryPoint) throw new Error("keyring sendUserOp: mising env")
+    // const providerURL = 'https://sepolia.infura.io/v3/c44125ff3ee1413eb99bf8a4b5b18e61';
+    const providerURL = config.network.provider;
+    // const pkey = 'f02d097a4059c83f459856e8455f63ad8fc1b260ba35871ac03d60e94304712c';
+    // const _entryPoint = config.network.entryPointAddress;
+    // console.log('teste11111')
+    if(!providerURL ) throw new Error("keyring sendUserOp: mising provider");
     const provider = new ethers.providers.JsonRpcProvider(providerURL);
-    const wallet = new ethers.Wallet(pkey, provider);
-    const _entryPointInterface = new ethers.utils.Interface([
-      'function handleOps(UserOperation[] calldata ops, address payable beneficiary) external payable',
-    ]);
+    console.log('arg: address',address);
+    const simpleAccount = this.keyrings[address] as any;
+    const pkey = simpleAccount.owner.privateKey;
+    const index = simpleAccount.index;
+    const owner = new ethers.Wallet(pkey, provider);
+    console.log(owner);
+    // throw new Error('break');
+    // const _entryPointInterface = new ethers.utils.Interface([
+    //   'function handleOps(UserOperation[] calldata ops, address payable beneficiary) external payable',
+    // ]);
     // const values: ReadonlyArray<any> = [[userOp], wallet.address];
     // const data = _entryPointInterface.encodeFunctionData('handleOps', values);
-
-    const contract = new ethers.Contract(_entryPoint, entryPointData.abi, wallet);
-    const tx = await contract.handleOps([userOp], wallet.address);
-    const receipt = await tx.wait();
-    return receipt.transactionHash;
+    const code = await provider.getCode(address);
+    if(code === '0x'){
+      console.log('initCodeCall');
+      const iface = new ethers.utils.Interface([
+        'function createAccount(address owner,uint256 salt) public returns (RWallet ret)'
+      ]);
+      const iface2 = new ethers.utils.Interface([
+        'function isWallet(address account) public view returns(bool)'
+      ]); 
+      const factoryAddress = config.factory_address;
+      const contract = new ethers.Contract(factoryAddress, iface, owner);
+      // const ret = await contract.isWallet(address);
+      // console.log(ret);
+      const create = await contract.createAccount(owner.address, index);
+      const receipt = await create.wait();
+      console.log(receipt);
+      return receipt.transactionHash; 
+      // return null
+    } 
+    else {
+      const walletInterface = new ethers.utils.Interface([
+        'function execute(address dest, uint256 value, bytes calldata func) external'
+      ]);
+      console.log(address);
+      const contract = new ethers.Contract(address, walletInterface, owner);
+      const data = walletInterface.decodeFunctionData('execute', (await userOp.callData));
+      console.log(`value: ${data.value} dest: ${data.dest}, func ${data.func}`);
+      const tx = await contract.execute(data.dest, data.value, data.func);
+      console.log(tx);
+      const receipt = await tx.wait();
+      console.log(receipt);
+      return receipt.transactionHash;
+    }
+    return null;
+    
     // const transaction: providers.TransactionRequest = {
     //   to: entryPoint,
     //   data: data,
@@ -429,6 +468,7 @@ export default class KeyringService extends BaseService<Events> {
     transaction: EthersTransactionRequest
   ): Promise<UserOperationStruct> => {
     const keyring = this.keyrings[address];
+    console.log('create unsig 1')
     const userOp = await keyring.createUnsignedUserOp({
       target: transaction.to,
       data: transaction.data
@@ -441,6 +481,7 @@ export default class KeyringService extends BaseService<Events> {
       maxFeePerGas: transaction.maxFeePerGas,
       maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
     });
+    console.log('create unsig 2')
 
     userOp.sender = await userOp.sender;
     userOp.nonce = ethers.BigNumber.from(await userOp.nonce).toHexString();
@@ -449,33 +490,47 @@ export default class KeyringService extends BaseService<Events> {
     userOp.callGasLimit = ethers.BigNumber.from(
       await userOp.callGasLimit
     ).toHexString();
+    console.log('create unsig 3')
     userOp.verificationGasLimit = ethers.BigNumber.from(
       await userOp.verificationGasLimit
     ).toHexString();
-    userOp.preVerificationGas = await userOp.preVerificationGas;
+    console.log('create unsig 4')
+    // userOp.preVerificationGas = await userOp.preVerificationGas;
+    userOp.preVerificationGas = ethers.BigNumber.from('1');
+    console.log('create unsig 4.5')
     userOp.maxFeePerGas = ethers.BigNumber.from(
-      await userOp.maxFeePerGas
+      // await userOp.maxFeePerGas
+      '1'
     ).toHexString();
+    console.log('create unsig 5')
     userOp.maxPriorityFeePerGas = ethers.BigNumber.from(
-      await userOp.maxPriorityFeePerGas
+      // await userOp.maxPriorityFeePerGas
+      '1'
     ).toHexString();
+    console.log('create unsig 6')
     userOp.paymasterAndData = await userOp.paymasterAndData;
     userOp.signature = await userOp.signature;
 
+    console.log('trosso 1')
     const gasParameters = await this.bundler?.estimateUserOpGas(
       await keyring.signUserOp(userOp)
     );
-
+    console.log('trosso 2')
     const estimatedGasLimit = ethers.BigNumber.from(
-      gasParameters?.callGasLimit
+      // gasParameters?.callGasLimit
+      '100000'
     );
+    console.log('trosso 3')
     const estimateVerificationGasLimit = ethers.BigNumber.from(
-      gasParameters?.verificationGas
+      // gasParameters?.verificationGas
+      '100000'
     );
+    console.log('trosso 4')
     const estimatePreVerificationGas = ethers.BigNumber.from(
-      gasParameters?.preVerificationGas
+      // gasParameters?.preVerificationGas
+      '100000'
     );
-
+    console.log('ultimo trosso')
     userOp.callGasLimit = estimatedGasLimit.gt(
       ethers.BigNumber.from(userOp.callGasLimit)
     )

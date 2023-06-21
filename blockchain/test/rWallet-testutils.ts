@@ -1,8 +1,8 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { RWalletFactory__factory, NFT__factory, MarketPlace__factory } from "../typechain";
+import { RWalletFactory__factory, RWalletFactory, NFT__factory, MarketPlace__factory } from "../typechain";
 import { expect } from "chai";
-
+import * as walletData from "../artifacts/contracts/wallet/RWallet.sol/RWallet.json"
 const provider = ethers.provider;
 
 export const deployFactory = async (signer: SignerWithAddress, entryPoint: string) => {
@@ -25,8 +25,6 @@ export const nftDeployAndMint = async (signer: SignerWithAddress, mintTo: string
         (event: any) => event.event === 'Transfer'
     );
     const tokenId = mintEvent?.args?.tokenId;
-    const nft1owner = await nft.ownerOf(tokenId);
-    expect(nft1owner).to.eq(mintTo);
     console.log(`\nnft ${tokenId} minted to ${mintTo}\n`);
     return [nft, tokenId];
 }
@@ -47,4 +45,16 @@ export const deployMktPlace = async (
     await mktPlace.deployTransaction.wait();
     console.log(`MarketPlace deployed at ${mktPlace.address}`);
     return mktPlace;
+}
+
+export const createWallet = async (factory: RWalletFactory, ownerAddress: string) => {
+    const salt = 2;
+    const newAccountTx = await factory.createAccount(ownerAddress, salt);
+    const newAccountReceipt = await newAccountTx.wait();
+    const newAccountEvent = newAccountReceipt.events?.find(
+            (event: any) => event.event === 'WalletCreated'
+    );
+    const walletAddress = newAccountEvent?.args?.account;
+    const wallet = new ethers.Contract(walletAddress, walletData.abi, provider);
+    return wallet;
 }

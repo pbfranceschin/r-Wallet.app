@@ -2,14 +2,14 @@
 export default {
   enablePasswordEncryption: false,
   showTransactionConfirmationScreen: true,
-  factory_address: '0x5931497B19eC71938720F2d545E3253BeE4B0054',
+  factory_address: '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3',
   stateVersion: '0.1',
   network: {
-    chainID: '11155111',
+    chainID: '1313161555',
     family: 'EVM',
-    name: 'Sepolia',
-    provider: 'https://sepolia.infura.io/v3/bdabe9d2f9244005af0f566398e648da',
-    entryPointAddress: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    name: 'Aurora Testnet',
+    provider: 'https://testnet.aurora.dev',
+    entryPointAddress: '0xD2617C1F24884faC6Ed87A0Df8F8c476EeB83199',
     bundler: 'https://sepolia.voltaire.candidewallet.com/rpc',
     baseAsset: {
       symbol: 'ETH',
