@@ -164,29 +164,32 @@ export const sendTransaction = createBackgroundAsyncThunk(
     { address, context }: { address: string; context?: any },
     { dispatch, extra: { mainServiceManager } }
   ) => {
+    console.log('check 0');
     const keyringService = mainServiceManager.getService(
       KeyringService.name
     ) as KeyringService;
-
+    console.log('check 1');
     const state = mainServiceManager.store.getState() as RootState;
     const unsignedUserOp = state.transactions.unsignedUserOperation;
     const origin = state.transactions.requestOrigin;
-
+    console.log('check 2');
     if (unsignedUserOp) {
       const signedUserOp = await keyringService.signUserOpWithContext(
         address,
         unsignedUserOp,
         context
       );
+      console.log('check 3');
       const txnHash = keyringService.sendUserOp(address, signedUserOp);
-
+      console.log('check 4');
       dispatch(clearTransactionState());
-
+      console.log('check 5');
       const providerBridgeService = mainServiceManager.getService(
         ProviderBridgeService.name
       ) as ProviderBridgeService;
-
+      console.log('check 6');
       providerBridgeService.resolveRequest(origin || '', txnHash);
+      console.log('check 7');
     }
   }
 );
@@ -194,20 +197,23 @@ export const sendTransaction = createBackgroundAsyncThunk(
 export const createUnsignedUserOp = createBackgroundAsyncThunk(
   'transactions/createUnsignedUserOp',
   async (address: string, { dispatch, extra: { mainServiceManager } }) => {
+    console.log('outra coisa 1');
     const keyringService = mainServiceManager.getService(
       KeyringService.name
     ) as KeyringService;
-
+    console.log('outra coisa 2');
     const state = mainServiceManager.store.getState() as RootState;
     const transactionRequest = state.transactions.transactionRequest;
-
+    console.log( transactionRequest);
     if (transactionRequest) {
       const userOp = await keyringService.createUnsignedUserOp(
         address,
         transactionRequest
       );
+      console.log('outra coisa 4');
       dispatch(setUnsignedUserOperation(userOp));
     }
+    
   }
 );
 
