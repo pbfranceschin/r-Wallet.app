@@ -20,8 +20,8 @@ import { EthersTransactionRequest } from './types';
 import { UserOperationStruct } from '@account-abstraction/contracts';
 import * as entryPointData from './EntryPoint.json';
 import * as contractData from '../../../../contracts/hardhat_contracts.json';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: __dirname+'../../../../.env' });
+//import * as dotenv from 'dotenv';
+// dotenv.config({ path: __dirname+'../../../../.env' });
 
 import config from '../../../exconfig';
 
