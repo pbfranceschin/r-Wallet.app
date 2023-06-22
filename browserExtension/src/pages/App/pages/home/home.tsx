@@ -14,9 +14,35 @@ import AccountInfo from '../../components/account-info';
 import Header from '../../components/header';
 import TransferAssetButton from '../../components/transfer-asset-button';
 import { useBackgroundSelector } from '../../hooks';
+import { getContractData } from '../../../../utils'
+import { useTokenCount, useTokenUri, useTokenImage, useTokenMetaData, useAccountTokens } from '../../hooks/nfts'
+
+const TempImage = ({tokenId}: {tokenId: number}) => {
+  const image: string = useTokenImage(tokenId);
+  return (
+    <img src={image} />
+  );
+}
 
 const Home = () => {
   const activeAccount = useBackgroundSelector(getActiveAccount);
+
+  // console.log("getContractData", getContractData())
+  const tokenCount = useTokenCount();
+  console.log("tokenCount", tokenCount)
+  // const uri = useTokenUri(1)
+  // console.log("uri", uri);
+  // const tokenMetaData = useTokenMetaData(1);
+  // console.log("tokenMetaData", tokenMetaData)
+  // const tokenImage = useTokenImage(5);
+  // console.log("useTokenImage", tokenImage)
+  let tokens = [];
+  for (let i = 5; i < tokenCount; i++) {
+    tokens.push(i);
+  }
+
+  const accountTokens = useAccountTokens(activeAccount? activeAccount : '');
+  console.log(accountTokens);
 
   return (
     <Container sx={{ width: '62vw', height: '100vh' }}>
@@ -46,6 +72,13 @@ const Home = () => {
           </Box>
         </CardContent>
       </Card>
+      {
+        tokens.map((tokenId: number) => {
+          return (
+            <TempImage tokenId={tokenId} />
+          );
+        })
+      }
     </Container>
   );
 };
