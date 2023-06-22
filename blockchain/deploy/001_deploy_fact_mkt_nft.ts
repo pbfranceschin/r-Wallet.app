@@ -18,33 +18,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  await deploy('EntryPoint', {
-    from: deployer,
-    args: [],
-    log: true
-  });
-
-  const entryPoint = (await deployments.get('EntryPoint')).address;
-  console.log('ep:',entryPoint);
-  
-  await deploy('RWalletFactory', {
-    from: deployer,
-    args: [entryPoint],
-    log: true,
-  });
-
-  // const RWalletFactory = await deployments.get('RWalletFactory');
-  // const RWalletFactoryAddress = RWalletFactory.address;
-
-  // await deploy('MarketPlace', {
+  // await deploy('EntryPoint', {
   //   from: deployer,
-  //   args: [
-  //     RWalletFactoryAddress,
-  //     feeBase,
-  //     feeMul
-  //   ],
+  //   args: [],
   //   log: true
   // });
+
+  // const entryPoint = (await deployments.get('EntryPoint')).address;
+  // console.log('ep:',entryPoint);
+  
+  // await deploy('RWalletFactory', {
+  //   from: deployer,
+  //   args: [entryPoint],
+  //   log: true,
+  // });
+
+  // const RWalletFactory = await deployments.get('RWalletFactory');
+  const RWalletFactoryAddress = '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3';
+
+  await deploy('MarketPlace', {
+    from: deployer,
+    args: [
+      RWalletFactoryAddress,
+      feeBase,
+      feeMul
+    ],
+    log: true
+  });
 
   // if(!pkey || !apikey) throw new Error('missing enviroment');
   // await deploy('NFT', {
