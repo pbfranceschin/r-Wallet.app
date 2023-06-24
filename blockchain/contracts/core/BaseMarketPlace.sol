@@ -16,7 +16,7 @@ contract BaseMarketPlace {
     uint256 public feeMultiplier;
 
     struct NFT {
-        bool available;
+        uint256 index;
         address lender;
         address contract_;
         uint256 id;
@@ -24,10 +24,18 @@ contract BaseMarketPlace {
         uint256 maxDuration;
     }
 
-    mapping (address => NFT[]) private _assets;
+    NFT[] private _assets;
+
+    mapping (address => NFT[]) private _assetsByLender;
 
     mapping(address => uint256) private _balances;
 
+    event Listing(
+        address indexed lender,
+        address indexed nftContract,
+        uint256 tokenId
+    );
+    
     event Loan(
         address indexed lender,
         address indexed borrower,
@@ -45,8 +53,12 @@ contract BaseMarketPlace {
         feeMultiplier = _feeMultiplier;
     }
 
-    function getAssets(address lender) public view returns(NFT[] memory) {
-        return _assets[lender];
+    function getAssets() public view returns(NFT[] memory) {
+        return _assets;
+    }
+
+    function getAssetsByLender(address lender) public view returns(NFT[] memory) {
+        return _assetsByLender[lender];
     }
 
     function getBalance(address account) public view returns(uint256) {
@@ -60,26 +72,29 @@ contract BaseMarketPlace {
     function lendNFT(address contract_, uint256 tokenId, uint256 price, uint256 maxDuration) public {
         require(_isApproved(contract_, tokenId), "Operator not approved");
         require(msg.sender == _getNFTowner(contract_, tokenId), "caller is not NFT owner");
+        uint256 index = _assets.length;
         NFT memory newAsset = NFT(
-            true,
+            index,
             msg.sender,
             contract_,
             tokenId,
             price,
             maxDuration
         );
-        _assets[msg.sender].push(newAsset);
+        _assets.push(newAsset);
+        _assetsByLender[msg.sender].push(newAsset);
+        emit Listing(msg.sender, contract_, tokenId);
     }
 
     function borrowNFT(address lender, uint256 index, uint256 duration) public payable {
         require(isWallet(msg.sender), "caller is not a renter wallet contract");
-        uint256 _maxDuration = _assets[lender][index].maxDuration;
+        uint256 _maxDuration = _assets[index].maxDuration;
         require(duration <= _maxDuration, "loan period set too long");
-        uint256 price = _assets[lender][index].price;
+        uint256 price = _assets[index].price;
         uint256 serviceFee = (price * duration * feeMultiplier) / feeBase;
-        require(msg.value >= (price *duration)+ serviceFee, "not enough funds");
-        uint256 tokenId = _assets[lender][index].id;
-        address contract_ = _assets[lender][index].contract_;
+        require(msg.value >= (price * duration) + serviceFee, "not enough funds");
+        uint256 tokenId = _assets[index].id;
+        address contract_ = _assets[index].contract_;
         require(_operatorCount(msg.sender, contract_) <= 0, "error: operator count greater than zero" );
         require(_isApproved(contract_, tokenId), "error: token approval was revoked");
 
@@ -93,9 +108,17 @@ contract BaseMarketPlace {
             lender,
             duration
         );
-        _assets[lender][index].available = false;
+        // _assetsByLender[lender][index].available = false;
+        _removeListing(index);
         nftContract.transferFrom(lender, msg.sender, tokenId);
         emit Loan(lender, msg.sender, contract_, tokenId);
+    }
+
+    function _removeListing(uint256 index) private {
+        uint256 lastIndex = _assets.length - 1;
+        _assets[index] = _assets[lastIndex];
+        _assets[index].index = index;
+        _assets.pop();
     }
 
     function withdraw() public {
@@ -107,7 +130,6 @@ contract BaseMarketPlace {
         require(success, "transfer of funds failed");
     }
     
-    // CHANGE TO PRIVATE
     function _isApproved(address contract_, uint256 tokenId) private view returns(bool) {
         IERC721 nftContract = IERC721(contract_);
         address owner = nftContract.ownerOf(tokenId);

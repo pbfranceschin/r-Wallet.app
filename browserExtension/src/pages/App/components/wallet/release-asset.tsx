@@ -25,14 +25,14 @@ import {
 const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
 const tokenId = ethers.BigNumber.from('0');
 
-const ReleaseAsset = () => {
+const ReleaseAsset = ({ index }: { index: number }) => {
     const navigate = useNavigate();
     const provider =  useProvider();
     const NFT = getEthersNftContract(provider) ;
     const [error, setError] = React.useState<string>('');
     const activeAccount = useBackgroundSelector(getActiveAccount);
     const [loader, setLoader] = React.useState<boolean>(false);
-    const index = 0;
+    // const [index, setIndex] = React.useState<Number>();
     const abi = [
         'function releaseSingleAsset(address contract_, uint256 index)'
     ];
@@ -69,7 +69,7 @@ const ReleaseAsset = () => {
           navigate('/');
         }
         setLoader(false);
-      }, [activeAccount, navigate, index]);
+      }, [activeAccount, navigate]);
     
 
     return (

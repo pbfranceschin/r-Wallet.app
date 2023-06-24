@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // const RWalletFactory = await deployments.get('RWalletFactory');
   const RWalletFactoryAddress = '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3';
 
-  await deploy('MarketPlace', {
+  await deploy('BaseMarketPlace', {
     from: deployer,
     args: [
       RWalletFactoryAddress,

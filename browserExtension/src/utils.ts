@@ -2,6 +2,8 @@ import { ethers } from "ethers";
 import { Provider } from '@ethersproject/providers';
 import axios, { AxiosInstance } from 'axios';
 import NFT from "./NFT.json";
+import MarketPlace from "./MarketPlace.json";
+import BaseMarketPlace from "./BaseMarketPlace.json";
 import { ContractInterface, Contract } from '@ethersproject/contracts';
 
 interface NFT {
@@ -11,6 +13,10 @@ interface NFT {
 
 const contractAddress: string = NFT.address;
 const contractABI: ContractInterface = NFT.abi;
+
+export const getMktPlaceData = () => {
+  return [BaseMarketPlace.address, BaseMarketPlace.abi];
+}
 
 export const getContractData = (): [string, ContractInterface] => {
   return [contractAddress, contractABI];

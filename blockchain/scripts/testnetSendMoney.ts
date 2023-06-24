@@ -29,8 +29,8 @@ const main = async () => {
     console.log('pubkey', addr);
     const tx = {
         from: addr,
-        to: '0xdDBC6a38c3C6468BcC236862B9F6AA5e243035Ff',
-        value: ethers.utils.parseEther('0.03'),
+        to: '0xf36D84389b2c6846189fBe64dEfBd201f512205A',
+        value: ethers.utils.parseEther('0.02'),
     }
     const send = await signer.sendTransaction(tx);
     const receipt = await send.wait();

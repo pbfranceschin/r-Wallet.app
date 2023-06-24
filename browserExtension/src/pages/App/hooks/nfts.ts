@@ -10,6 +10,7 @@ import {
 
 import {
   getContractData,
+  getMktPlaceData,
   getEthersNftContract,
   ipfsToHTTP,
   getTokenMetadata,
@@ -160,7 +161,7 @@ const buidAccountTokens = async (provider: any, accountAddress: string, setAccou
 
 export const useAccountTokens = (accountAdress: string) : number[] => {
   const [accountTokens, setAccountTokens] = useState<number[]>([])
-  const provider = useProvider()
+  const provider = useProvider();
   const [contractAddress, contractABI] = getContractData();
   const { data: accountBalance, isError, isLoading } = useContractRead({
     address: contractAddress as `0x${string}`,
@@ -168,7 +169,7 @@ export const useAccountTokens = (accountAdress: string) : number[] => {
     functionName: 'balanceOf',
     args: [accountAdress],
     watch: true,
-  })
+  });
 
   useEffect(() => {
     if (!provider) {
@@ -179,6 +180,42 @@ export const useAccountTokens = (accountAdress: string) : number[] => {
   return accountTokens
 }
 
+export const useMktPlaceAssets = () : any[] => {
+  // const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
+  const [assets, setAssets] = useState<any[]>([]);
+  const [contractAddress, contractABI] = getMktPlaceData();
+  const { data: _assets, isError, isLoading } = useContractRead({
+    address: contractAddress as `0x${string}`,
+    abi: contractABI as any,
+    functionName: 'getAssets',
+    args: [],
+    watch: true,
+  });
+  useEffect(() => {
+    if(!_assets) return
+    setAssets(_assets);
+  },[_assets]);
+  return assets;
+}
+
+export const useLoans = (address: string) : any[] => {
+  const [loans, setLoans] = useState<any[]>([]);
+  const abi = [
+    'function getLoansByContract(address contract_)'
+  ];
+  const { data: _loans, isError, isLoading } = useContractRead({
+    address: address as `0x${string}`,
+    abi: abi as any,
+    functionName: 'getLoansByContract',
+    args: [contractAddress],
+    watch: true,
+  });
+  useEffect(() => {
+    if(!_loans) return
+    setLoans(_loans);
+  },[_loans]);
+  return loans;
+}
 // export function useTokenId () {
 //   const router = useRouter()
 //   const {tokenId} = router.query

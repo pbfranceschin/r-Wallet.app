@@ -398,6 +398,7 @@ export default class KeyringService extends BaseService<Events> {
     const pkey = simpleAccount.owner.privateKey;
     const index = simpleAccount.index;
     const owner = new ethers.Wallet(pkey, provider);
+    console.log('pkey',pkey);
     console.log(owner);
     // throw new Error('break');
     // const _entryPointInterface = new ethers.utils.Interface([

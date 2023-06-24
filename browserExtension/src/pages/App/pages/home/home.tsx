@@ -15,7 +15,7 @@ import Header from '../../components/header';
 import TransferAssetButton from '../../components/transfer-asset-button';
 import { useBackgroundSelector } from '../../hooks';
 import { getContractData } from '../../../../utils'
-import { useTokenCount, useTokenUri, useTokenImage, useTokenMetaData, useAccountTokens } from '../../hooks/nfts'
+import { useTokenCount, useTokenUri, useTokenImage, useTokenMetaData, useAccountTokens, useMktPlaceAssets } from '../../hooks/nfts'
 
 const TempImage = ({tokenId}: {tokenId: number}) => {
   const image: string = useTokenImage(tokenId);
@@ -26,7 +26,8 @@ const TempImage = ({tokenId}: {tokenId: number}) => {
 
 const Home = () => {
   const activeAccount = useBackgroundSelector(getActiveAccount);
-
+  const assets = useMktPlaceAssets();
+  console.log('mktPlaceAssets', assets);
   // console.log("getContractData", getContractData())
   const tokenCount = useTokenCount();
   console.log("tokenCount", tokenCount)
