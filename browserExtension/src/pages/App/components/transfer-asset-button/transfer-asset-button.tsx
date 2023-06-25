@@ -6,7 +6,7 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { WavingHandRounded } from '@mui/icons-material';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
-import { Borrow, Lend } from '../mktPlace';
+import { Borrow, Lend, Approve } from '../mktPlace';
 import { getContractData } from '../../../../utils';
 
 const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
@@ -108,6 +108,10 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
       id={tokenId}
       price={price}
       maxDuration={maxDuration}
+      />
+      <Approve
+      contract={nftAddress}
+      tokenId={tokenId}
       />
     </Stack>
   );

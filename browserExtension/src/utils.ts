@@ -13,9 +13,11 @@ interface NFT {
 
 const contractAddress: string = NFT.address;
 const contractABI: ContractInterface = NFT.abi;
+const mktPlaceAddress: string = BaseMarketPlace.address;
+const mktPlaceAbi: ContractInterface = BaseMarketPlace.abi; 
 
 export const getMktPlaceData = () => {
-  return [BaseMarketPlace.address, BaseMarketPlace.abi];
+  return [mktPlaceAddress, mktPlaceAbi];
 }
 
 export const getContractData = (): [string, ContractInterface] => {

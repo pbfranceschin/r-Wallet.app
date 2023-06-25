@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import * as dotenv from 'dotenv';
 import testnet_nft from '../deployments/aurora_testnet/NFT.json';
-import testnet_mktplace from '../deployments/aurora_testnet/MarketPlace.json';
+import testnet_mktplace from '../deployments/aurora_testnet/BaseMarketPlace.json';
 import { token } from "../typechain/@openzeppelin/contracts";
 
 dotenv.config();
@@ -17,28 +17,31 @@ const tokenId = 11;
 
 const main = async() => {
     
-    // const signer = new ethers.Wallet(pkey, provider);
-    // let abi = [
-    //     'function approve(address to, uint256 tokenId)'
-    // ];
-    // const iface = new ethers.utils.Interface(abi); 
-    // const calldata = iface.encodeFunctionData("approve", [
-    //     testnet_mktplace.address,
-    //     tokenId
-    // ]);
-    // abi = [
-    //     'function execute(address dest, uint256 value, bytes calldata func) external'
-    // ];
-    // const walletContract = new ethers.Contract(walletAddress, abi, signer);
-    // console.log(`\napproving token ${tokenId} ...`);
-    // const borrow = await walletContract.execute(testnet_nft.address, 0, calldata);
-    // const receipt = await borrow.wait();
-    // console.log(receipt);
+    const signer = new ethers.Wallet(pkey, provider);
+    const bal = (await provider.getBalance(signer.address)).toString()
+    console.log(ethers.utils.formatEther(bal));
+    let abi = [
+        'function approve(address to, uint256 tokenId)'
+    ];
+    const iface = new ethers.utils.Interface(abi); 
+    const calldata = iface.encodeFunctionData("approve", [
+        testnet_mktplace.address,
+        tokenId
+    ]);
+    abi = [
+        'function execute(address dest, uint256 value, bytes calldata func) external'
+    ];
+    const walletContract = new ethers.Contract(walletAddress, abi, signer);
+    console.log(`\napproving token ${tokenId} ...`);
+    const borrow = await walletContract.execute(testnet_nft.address, 0, calldata);
+    const receipt = await borrow.wait();
+    console.log(receipt);
     
     const nftContract = new ethers.Contract(testnet_nft.address, testnet_nft.abi, provider);
     console.log(`is approved? tokenId ${tokenId}`);
     const appr = await nftContract.getApproved(tokenId);
     console.log(appr == testnet_mktplace.address);
+    console.log(testnet_mktplace.address);
 }
 
 main().catch((error) => {

@@ -9,36 +9,30 @@ import { useProvider } from 'wagmi';
 import { useMktPlaceAssets } from '../../hooks/nfts';
 import { getMktPlaceData, getContractData } from '../../../../utils';
 
-export const Lend = ({
-    address,
-    id,
-    price,
-    maxDuration 
-}: {
-    address : string,
-    id: number,
-    price: BigNumber,
-    maxDuration: BigNumber
+
+export const Approve = ({
+    contract, tokenId
+} : {
+    contract: string,
+    tokenId: number
 }) => {
     const navigate = useNavigate();
     const [error, setError] = React.useState<string>('');
     const activeAccount = useBackgroundSelector(getActiveAccount);
     const [loader, setLoader] = React.useState<boolean>(false);
     const [mktPlaceAddress] = getMktPlaceData();
-    console.log(mktPlaceAddress);
+    // const mktAddress = mktPlaceAddress as string;
     // const [nftAddress] = getContractData();
     const abi = [
-        'function lendNFT(address contract_, uint256 tokenId, uint256 price, uint256 maxDuration)'
-    ];
+        'function approve(address to, uint256 tokenId)'
+    ]
     const iface = new ethers.utils.Interface(abi); 
-    const calldata = iface.encodeFunctionData("lendNFT", [
-        address,
-        id,
-        price,
-        maxDuration
+    const calldata = iface.encodeFunctionData("approve", [
+        mktPlaceAddress,
+        tokenId
     ]);
-    const lend = useCallback(async () => {
-        if (!ethers.utils.isAddress(activeAccount? activeAccount : '')) {
+    const approve = useCallback(async () => {
+        if (!ethers.utils.isAddress(contract)) {
           setError('Invalid to address');
           console.log(error)
           return;
@@ -55,24 +49,21 @@ export const Lend = ({
             params: [
               {
                 from: activeAccount,
-                to: mktPlaceAddress,
+                to: contract,
                 data: calldata,
-                value: ethers.utils.parseEther('0'),
-                gas: "0x186A0"
+                // gas: "0x186A0",
+                value: ethers.utils.parseEther('0')
               },
             ],
           });
           console.log(txHash);
-          alert(`token successfully listed! tx ${txHash}`)
+          alert(`token successfully approved! tx ${txHash}`)
           navigate('/');
         }
         setLoader(false);
       }, [activeAccount, navigate]);
     
-    return (
-        <>
-        <button onClick={lend}> lend</button>
-        </>
-    )
+      return(
+        <button onClick={approve}> approve </button>
+      )
 }
-

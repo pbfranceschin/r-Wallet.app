@@ -29,7 +29,7 @@ const main = async () => {
     //     'function ownerOf(uint256 tokenId) public view virtual override returns (address)'
     // ]);
     // const to = '0x623Fd2C30ccBE58110268972E1c9fe3825d39e15';
-    const tokenId = 11
+    const tokenId = 10
     // console.log('tokenId', tokenId);
 
     // console.log('\nminting...')
@@ -43,10 +43,12 @@ const main = async () => {
     // const trReceipt = await transfer.wait()
     // console.log(trReceipt);
 
-    console.log(`\napproving token ${tokenId}...`)
-    const approve = await nftContract.approve(mktPlace.address, tokenId);
-    const appReceipt = await approve.wait();
-    console.log(appReceipt);
+    // console.log(`\napproving token ${tokenId}...`)
+    // const approve = await nftContract.approve(mktPlace.address, tokenId);
+    // const appReceipt = await approve.wait();
+    // console.log(appReceipt);
+    // const appr = await nftContract.getApproved(tokenId)
+    // console.log(`approved? token ${tokenId}`, appr == mktPlace.address);
 
     // console.log('\nlending...');
     // const price = ethers.utils.parseEther('0.00018');
@@ -57,9 +59,9 @@ const main = async () => {
     // console.log(await nftContract.getApproved(tokenId));
     // console.log('mktPlace assets', await contract.getAssets()); 
     
-    // console.log(`\nowner check token ${tokenId}`);
-    // const nftOwner = await nftContract.ownerOf(tokenId);
-    // console.log(nftOwner == walletAddress);
+    console.log(`\nowner check token ${tokenId}`);
+    const nftOwner = await nftContract.ownerOf(tokenId);
+    console.log(nftOwner == walletAddress);
     // console.log((await nftContract.totalSupply()).toString());
 
     // console.log(await provider.getFeeData());

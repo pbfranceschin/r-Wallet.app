@@ -23,19 +23,21 @@ export const Borrow = ({
     const activeAccount = useBackgroundSelector(getActiveAccount);
     const [loader, setLoader] = React.useState<boolean>(false);
     const [mktPlaceAddress] = getMktPlaceData();
-    console.log('mktplaceAddress', mktPlaceAddress);
-    const [nftAddress] = getContractData();
+    const mktAddress = mktPlaceAddress as string;
+    // console.log('mktplaceAddress', mktPlaceAddress);
+    const value_ = ethers.BigNumber.from(value);
+    // const [nftAddress] = getContractData();
     const abi = [
-        'function borrowNFT(address lender, uint256 index, uint256 duration) public payable'
+        'function borrowNFT(address lender, uint256 index, uint256 duration)'
     ];
     const iface = new ethers.utils.Interface(abi); 
     const calldata = iface.encodeFunctionData("borrowNFT", [
         lender,
-        ethers.BigNumber.from(index.toString()),
-        ethers.BigNumber.from(duration.toString())
+        index,
+        duration
     ]);
     const borrow = useCallback(async () => {
-        if (!ethers.utils.isAddress(activeAccount? activeAccount : '')) {
+        if (!ethers.utils.isAddress(mktAddress)) {
           setError('Invalid to address');
           console.log(error)
           return;
@@ -52,10 +54,10 @@ export const Borrow = ({
             params: [
               {
                 from: activeAccount,
-                to: mktPlaceAddress,
+                to: mktAddress,
                 data: calldata,
-                gas: "0x186A0",
-                value: ethers.utils.parseEther(value.toString()),
+                // gas: "0x186A0",
+                value: value_
               },
             ],
           });
