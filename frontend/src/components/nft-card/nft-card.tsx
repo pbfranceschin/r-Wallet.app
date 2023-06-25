@@ -35,7 +35,7 @@ export const NFTCard = ({ className, image, title, price, setIsNFTOpen }: NFTCar
                     <h3 className={styles['card-title']}>{title}</h3>
                     {price && (
                       <div className={styles['card-price']}>
-                        <p>{price} ETH</p>
+                        <p>{price} ETH/min</p>
                       </div>
                     )}
                 </div>

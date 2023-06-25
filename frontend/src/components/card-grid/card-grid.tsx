@@ -17,7 +17,7 @@ export const CardGrid = ({ className, setIsNFTOpen }: CardGridProps) => {
                 <NFTCard
                     image="https://wixplosives.github.io/codux-assets-storage/add-panel/image-placeholder.jpg"
                     title="NFT Title1"
-                    // price={0.001}
+                    price={0.001}
                     setIsNFTOpen={setIsNFTOpen}
                 />
                 <NFTCard
