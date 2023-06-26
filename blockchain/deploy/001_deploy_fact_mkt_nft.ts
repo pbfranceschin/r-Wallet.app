@@ -34,24 +34,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // });
 
   // const RWalletFactory = await deployments.get('RWalletFactory');
-  const RWalletFactoryAddress = '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3';
+  // const RWalletFactoryAddress = '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3';
 
-  await deploy('BaseMarketPlace', {
-    from: deployer,
-    args: [
-      RWalletFactoryAddress,
-      feeBase,
-      feeMul
-    ],
-    log: true
-  });
+  // await deploy('BaseMarketPlace', {
+  //   from: deployer,
+  //   args: [
+  //     RWalletFactoryAddress,
+  //     feeBase,
+  //     feeMul
+  //   ],
+  //   log: true
+  // });
 
   // if(!pkey || !apikey) throw new Error('missing enviroment');
-  // await deploy('NFT', {
-  //   from: deployer,
-  //   args: [],
-  //   log: true,
-  // });
+  await deploy('NFT', {
+    from: deployer,
+    args: [],
+    log: true,
+  });
 
   // const [owner] = await ethers.getSigners();
   // const provider = new ethers.providers.InfuraProvider("sepolia", apikey);

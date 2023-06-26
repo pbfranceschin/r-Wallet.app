@@ -16,6 +16,7 @@ import TransferAssetButton from '../../components/transfer-asset-button';
 import { useBackgroundSelector } from '../../hooks';
 import { getContractData } from '../../../../utils'
 import { useTokenCount, useTokenUri, useTokenImage, useTokenMetaData, useAccountTokens, useMktPlaceAssets } from '../../hooks/nfts'
+import { ProfileDashboard } from '../../components/dashboard/profile-dashboard/profile-dashboard';
 
 const TempImage = ({tokenId}: {tokenId: number}) => {
   const image: string = useTokenImage(tokenId);
@@ -46,41 +47,42 @@ const Home = () => {
   console.log(accountTokens);
 
   return (
-    <Container sx={{ width: '62vw', height: '100vh' }}>
-      <Header />
-      <Card sx={{ ml: 4, mr: 4, mt: 2, mb: 2 }}>
-        <CardContent>
-          {activeAccount && <AccountInfo address={activeAccount}></AccountInfo>}
-          <Box
-            component="div"
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ m: 2 }}
-          >
-            <AccountBalanceInfo address={activeAccount} />
-          </Box>
-          <Box
-            component="div"
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ m: 4 }}
-          >
-            <TransferAssetButton activeAccount={activeAccount || ''} />
-          </Box>
-        </CardContent>
-      </Card>
-      {
-        tokens.map((tokenId: number) => {
-          return (
-            <TempImage tokenId={tokenId} />
-          );
-        })
-      }
-    </Container>
+    // <Container sx={{ width: '62vw', height: '100vh' }}>
+    //   <Header />
+    //   <Card sx={{ ml: 4, mr: 4, mt: 2, mb: 2 }}>
+    //     <CardContent>
+    //       {activeAccount && <AccountInfo address={activeAccount}></AccountInfo>}
+    //       <Box
+    //         component="div"
+    //         display="flex"
+    //         flexDirection="column"
+    //         justifyContent="center"
+    //         alignItems="center"
+    //         sx={{ m: 2 }}
+    //       >
+    //         <AccountBalanceInfo address={activeAccount} />
+    //       </Box>
+    //       <Box
+    //         component="div"
+    //         display="flex"
+    //         flexDirection="column"
+    //         justifyContent="center"
+    //         alignItems="center"
+    //         sx={{ m: 4 }}
+    //       >
+    //         <TransferAssetButton activeAccount={activeAccount || ''} />
+    //       </Box>
+    //     </CardContent>
+    //   </Card>
+    //   {
+    //     tokens.map((tokenId: number) => {
+    //       return (
+    //         <TempImage tokenId={tokenId} />
+    //       );
+    //     })
+    //   }
+    // </Container>
+    <ProfileDashboard activeAccount={activeAccount}/>    
   );
 };
 

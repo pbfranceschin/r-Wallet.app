@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import StoreIcon from '@mui/icons-material/Store';
 import { Avatar, Stack, Tooltip, Typography, useTheme } from '@mui/material';
@@ -8,10 +8,29 @@ import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { Borrow, Lend, Approve } from '../mktPlace';
 import { getContractData } from '../../../../utils';
+import {
+  AccountData,
+  getAccountData,
+} from '../../../Background/redux-slices/account';
+import { useBackgroundSelector } from '../../hooks';
+import { getActiveNetwork } from '../../../Background/redux-slices/selectors/networkSelectors';
+import { getAccountEVMData } from '../../../Background/redux-slices/selectors/accountSelectors';
+
 
 const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const activeNetwork = useBackgroundSelector(getActiveNetwork);
+  const address = activeAccount? activeAccount as string : "";
+  const accountData: AccountData | 'loading' = useBackgroundSelector((state) =>
+    getAccountEVMData(state, { address, chainId: activeNetwork.chainID })
+  );
+  
+  const walletDeployed: boolean = useMemo(
+    () => (accountData === 'loading' ? false : accountData.accountDeployed),
+    [accountData]
+  );
+  
   const [nftAddress] = getContractData();
   const tokenId = 11;
   const price = ethers.utils.parseEther('0.0000001');
@@ -21,6 +40,7 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
   const duration = 10;
   const value = (180000000000000*10)+((180000000000000*10)*3)/1000;
   console.log('value', ethers.utils.formatEther(value.toString()))
+
 
 
   const sendMoney = useCallback(async () => {
@@ -44,19 +64,21 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
 
   return (
     <Stack direction={'row'} spacing={4}>
-      <Tooltip title="Coming soon">
+      {/* <Tooltip title="Coming soon"> */}
         <Stack
           justifyContent="center"
           alignItems="center"
           spacing={'4px'}
-          sx={{ cursor: 'not-allowed', opacity: 0.5 }}
+          sx={walletDeployed? { cursor: 'pointer' } : { cursor: 'not-allowed', opacity: 0.5 }}
         >
           <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-            <StoreIcon />
+            <StoreIcon
+            onClick={() => navigate('/dashboard')}
+            />
           </Avatar>
-          <Typography variant="button">Buy</Typography>
+          <Typography variant="button">NFT market</Typography>
         </Stack>
-      </Tooltip>
+      {/* </Tooltip> */}
       <Stack
         justifyContent="center"
         alignItems="center"
@@ -97,7 +119,7 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
           <Typography variant="button">Swap</Typography>
         </Stack>
       </Tooltip>
-      <Borrow
+      {/* <Borrow
       lender={dummy1}
       index={tokenIndex}
       duration={duration}
@@ -112,7 +134,7 @@ const TransferAssetButton = ({ activeAccount }: { activeAccount: string }) => {
       <Approve
       contract={nftAddress}
       tokenId={tokenId}
-      />
+      /> */}
     </Stack>
   );
 };

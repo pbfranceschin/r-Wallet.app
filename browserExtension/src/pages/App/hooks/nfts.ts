@@ -132,10 +132,10 @@ export const useTokenMetaData = (tokenId: number) : any => {
 
 export const useTokenImage = (tokenId: number) : string => {
   const metadata = useTokenMetaData(tokenId)
-//   console.log(metadata)
-//   if (metadata)
-//     console.log("image ",typeof metadata)
-//   console.log("---------------------")
+  console.log('metadata', metadata)
+  if (metadata)
+    console.log("image ",typeof metadata)
+  console.log("---------------------")
   return metadata ? ipfsToHTTP(metadata.image as string) : "";
 }
 
@@ -149,7 +149,7 @@ const buidAccountTokens = async (provider: any, accountAddress: string, setAccou
   const nftContract = getEthersNftContract(provider)
   const tokenCount = await nftContract.totalSupply();
   let promises = [];
-  const init = 5
+  const init = 5;
   for (let i = init; i < tokenCount; i++) {
     promises.push(isAccountToken(provider, accountAddress, i));
   }
