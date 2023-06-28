@@ -13,22 +13,22 @@ import {
     Stack,
     Typography,
   } from '@mui/material';
-  import React, { useCallback } from 'react';
-  import Header from '../../components/header';
-  import { BigNumber, ethers } from 'ethers';
-  import { useBackgroundSelector } from '../../hooks';
-  import { getActiveAccount } from '../../../Background/redux-slices/selectors/accountSelectors';
-  import { useNavigate } from 'react-router-dom';
-  import { getEthersNftContract } from '../../../../utils';
-  import { useProvider } from 'wagmi';  
-// const NFTaddress = '0x0A952031d753270f275C243EE92dbA431feE14a1';
-const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
-const tokenId = ethers.BigNumber.from('0');
+import React, { useCallback } from 'react';
+import Header from '../../components/header';
+import { BigNumber, ethers } from 'ethers';
+import { useBackgroundSelector } from '../../hooks';
+import { getActiveAccount } from '../../../Background/redux-slices/selectors/accountSelectors';
+import { useNavigate } from 'react-router-dom';
+import { getEthersNftContract } from '../../../../utils';
+import { useProvider } from 'wagmi';  
+import { getContractData } from '../../../../utils';
 
-const ReleaseAsset = ({ index }: { index: number }) => {
+const [fallbackContractAddress] = getContractData();
+
+const ReleaseAsset = ({ index }: { index: number | undefined }) => {
     const navigate = useNavigate();
     const provider =  useProvider();
-    const NFT = getEthersNftContract(provider) ;
+    const NFT = getEthersNftContract(fallbackContractAddress, provider) ;
     const [error, setError] = React.useState<string>('');
     const activeAccount = useBackgroundSelector(getActiveAccount);
     const [loader, setLoader] = React.useState<boolean>(false);
@@ -46,6 +46,7 @@ const ReleaseAsset = ({ index }: { index: number }) => {
           setError('Invalid to address');
           return;
         }
+        if(!index) setError('Missing prop: index');
         setLoader(true);
         setError('');
     

@@ -11,12 +11,12 @@ import { getMktPlaceData, getContractData } from '../../../../utils';
 
 
 export const Borrow = ({
-    lender, index, duration, value
+    lender, index, duration, price
 } : {
     lender: string,
     index: number,
-    duration: number,
-    value: number
+    duration: number | undefined,
+    price: number
 }) => {
     const navigate = useNavigate();
     const [error, setError] = React.useState<string>('');
@@ -24,8 +24,12 @@ export const Borrow = ({
     const [loader, setLoader] = React.useState<boolean>(false);
     const [mktPlaceAddress] = getMktPlaceData();
     const mktAddress = mktPlaceAddress as string;
+    const feeBase = 1000;
+    const feeMul = 3;
     // console.log('mktplaceAddress', mktPlaceAddress);
-    const value_ = ethers.BigNumber.from(value);
+    const loanValue = duration? (price*duration) : null;
+    const value_ = loanValue? loanValue + (loanValue * feeMul) / feeBase : null; 
+    const value = value_? ethers.BigNumber.from(value_) : null;
     // const [nftAddress] = getContractData();
     const abi = [
         'function borrowNFT(address lender, uint256 index, uint256 duration)'
@@ -40,6 +44,12 @@ export const Borrow = ({
         if (!ethers.utils.isAddress(mktAddress)) {
           setError('Invalid to address');
           console.log(error)
+          return;
+        }
+        if(!duration) {
+          const msg = 'No duration specified';
+          setError(msg);
+          alert(msg);
           return;
         }
         setLoader(true);
@@ -57,7 +67,7 @@ export const Borrow = ({
                 to: mktAddress,
                 data: calldata,
                 // gas: "0x186A0",
-                value: value_
+                value: value
               },
             ],
           });

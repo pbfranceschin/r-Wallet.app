@@ -1,20 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DialogBorrowedDescription } from '../dialog-borrowed-description/dialog-borrowed-description';
 import { DialogExploreDescription } from '../dialog-explore-description/dialog-explore-description';
 import { DialogOwnedDescription } from '../dialog-owned-description/dialog-owned-description';
 import styles from './nft-dialog.module.scss';
 import classNames from 'classnames';
+import { getNFTobj, getTokenContractAddress, getTokenId, useNFTtitle } from '../../../hooks/nfts';
 
 export interface NFTDialogProps {
     className?: string;
+    activeAccount?: string
+    context: string;
     setIsNFTOpen: any;
+    contract?: string;
+    id?: number;
+    index?: number;
 }
 
 /**
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
  */
-export const NFTDialog = ({ className, setIsNFTOpen }: NFTDialogProps) => {
+export const NFTDialog = ({
+    className,
+    activeAccount,
+    context,
+    setIsNFTOpen,
+    index,
+    contract,
+    id
+}: NFTDialogProps) => {
+    const [isOwned, setIsOwned] = useState<boolean>(false);
+    const [isBorrowed, setIsBorrowed] = useState<boolean>(false);
+    const [title, setTitle] = useState<string>('');
+    const [price, setPrice] = useState<number>();
+    const [lender, setLender] = useState<string>();
+    const [endTime, setEndTime] = useState<number>(-1);
     const onCloseDialog = () => {
         setIsNFTOpen(false);
     };
@@ -22,9 +42,23 @@ export const NFTDialog = ({ className, setIsNFTOpen }: NFTDialogProps) => {
     const stopPropagation = (e: any) => {
         e.stopPropagation();
     };
+    useEffect(() => {
+        if(context == 'owned') 
+            setIsOwned(true);
+        else{
+            const _NFT = getNFTobj(context, activeAccount, index);
+            const _title = useNFTtitle(_NFT.contract_, _NFT.id);
+            setTitle(_title? _title : '');
+            if(context == 'borrowed') {
+                setIsBorrowed(true);
+                setEndTime(_NFT.endTime);
+            } else if(context == 'explore'){
+                setPrice(_NFT.price);
+                setLender(_NFT.lender);
+            } else console.log('missing context');
+        }
+    });
 
-    const isOwned = false;
-    const isBorrowed = false;
 
     return (
         <div className={styles['nft-dialog-backdrop']} onClick={onCloseDialog}>
@@ -40,11 +74,23 @@ export const NFTDialog = ({ className, setIsNFTOpen }: NFTDialogProps) => {
                     </div>
                     <div className={styles['nft-description-container']}>
                         {isOwned ? (
-                          <DialogOwnedDescription />
+                          <DialogOwnedDescription 
+                          address={contract}
+                          id={id}
+                          />
                         ) : isBorrowed ? (
-                          <DialogBorrowedDescription />
+                          <DialogBorrowedDescription
+                          title={title}
+                          endTime={endTime}
+                          index={index}
+                          />
                         ) : (
-                          <DialogExploreDescription />
+                          <DialogExploreDescription
+                          price={price}
+                          title={title}
+                          lender={lender}
+                          index={index}
+                          />
                         )}
                     </div>
                 </div>

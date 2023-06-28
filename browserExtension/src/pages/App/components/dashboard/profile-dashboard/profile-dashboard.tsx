@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useState } from 'react';
 import { NFTGallery } from '../nft-gallery/nft-gallery';
 import { ProfileSectionContainer } from '../profile-section-container/profile-section-container';
@@ -22,6 +22,11 @@ export interface ProfileDashboardProps {
  */
 export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardProps) => {
   const [isNFTOpen, setIsNFTOpen] = useState(false);
+  const [index, setIndex] = useState<number>();
+  const [contract, setContract] = useState<string>();
+  const [tokenId, setTokenId] = useState<number>();
+  const initialContext = 'owned';
+  const context = useRef(initialContext);
   const activeNetwork = useBackgroundSelector(getActiveNetwork);
   const address = activeAccount? activeAccount as string : '';
   const accountData: AccountData | 'loading' = useBackgroundSelector((state) =>
@@ -30,9 +35,15 @@ export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardP
 
   console.log('isNFTOpen is ', isNFTOpen);
   
+  // { className, isOwned, isBorrowed, setIsNFTOpen, id, address, title, endTime, price, lender, index }
+
   return (
     <div>
-      {isNFTOpen && <NFTDialog setIsNFTOpen={setIsNFTOpen}/>}
+      {isNFTOpen && <NFTDialog
+      setIsNFTOpen={setIsNFTOpen} 
+      context={context.current}
+      activeAccount={activeAccount}
+      />}
       <div className={styles.layout}>
           <div className={styles.sidebar}>
             <ProfileSectionContainer activeAccount={activeAccount}/>
@@ -41,7 +52,13 @@ export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardP
             <div className={styles['topbar-button']}>Explore</div>
           </div>
           <div className={styles.gallery}>
-            <NFTGallery setIsNFTOpen={setIsNFTOpen}/>
+            <NFTGallery
+            setIsNFTOpen={setIsNFTOpen}
+            setIndex={setIndex}
+            setContract={setContract}
+            setTokenId={setTokenId}
+            context={context.current}
+            />
           </div>
       </div>
     </div>

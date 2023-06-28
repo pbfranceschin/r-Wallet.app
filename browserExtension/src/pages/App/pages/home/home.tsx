@@ -18,15 +18,16 @@ import { getContractData } from '../../../../utils'
 import { useTokenCount, useTokenUri, useTokenImage, useTokenMetaData, useAccountTokens, useMktPlaceAssets } from '../../hooks/nfts'
 import { ProfileDashboard } from '../../components/dashboard/profile-dashboard/profile-dashboard';
 
-const TempImage = ({tokenId}: {tokenId: number}) => {
-  const image: string = useTokenImage(tokenId);
-  return (
-    <img src={image} />
-  );
-}
+// const TempImage = ({tokenId}: {tokenId: number}) => {
+//   const image: string = useTokenImage(tokenId);
+//   return (
+//     <img src={image} />
+//   );
+// }
 
 const Home = () => {
   const activeAccount = useBackgroundSelector(getActiveAccount);
+  console.log('activeAccount', activeAccount);
   const assets = useMktPlaceAssets();
   console.log('mktPlaceAssets', assets);
   // console.log("getContractData", getContractData())
@@ -44,7 +45,7 @@ const Home = () => {
   }
 
   const accountTokens = useAccountTokens(activeAccount? activeAccount : '');
-  console.log(accountTokens);
+  console.log('accountTokens', accountTokens);
 
   return (
     // <Container sx={{ width: '62vw', height: '100vh' }}>

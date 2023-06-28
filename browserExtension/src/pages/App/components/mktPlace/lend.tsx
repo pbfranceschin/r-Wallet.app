@@ -15,10 +15,10 @@ export const Lend = ({
     price,
     maxDuration 
 }: {
-    address : string,
-    id: number,
-    price: BigNumber,
-    maxDuration: BigNumber
+    address : string | undefined,
+    id: number | undefined,
+    price: number | undefined,
+    maxDuration: number | undefined
 }) => {
     const navigate = useNavigate();
     const [error, setError] = React.useState<string>('');
@@ -41,6 +41,15 @@ export const Lend = ({
         if (!ethers.utils.isAddress(activeAccount? activeAccount : '')) {
           setError('Invalid to address');
           console.log(error)
+          return;
+        }
+        if(!address || !id) {
+          setError('Missing prop: "address"');
+          return;
+        }
+        if(!price || !maxDuration) {
+          const msg = 'Price and Max Loan period have to be specified';
+          alert(msg);
           return;
         }
         setLoader(true);

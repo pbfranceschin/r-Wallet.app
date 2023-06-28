@@ -16,8 +16,8 @@ import {
   getTokenMetadata,
 } from '../../../utils'
 
-const [contractAddress, contractABI] = getContractData();
-
+const [fallbackContractAddress] = getContractData();
+// const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
 // export const useTokenUri = (tokenId) => {
 //   const [tokenUri, setTokenUri] = useState()
 //   const [tokenUriError, setTokenUriError] = useState()
@@ -42,12 +42,12 @@ const [contractAddress, contractABI] = getContractData();
 //   return tokenUri
 // }
 
-export const useTokenUri = (tokenId: number) : any => {
+export const useTokenUri = (contract: string, tokenId: number) : any => {
   const [tokenUri, setTokenUri] = useState()
   const provider = useProvider()
   useEffect(() => {
     if (provider) {
-      const nftContract = getEthersNftContract(provider)
+      const nftContract = getEthersNftContract(contract, provider)
       nftContract.tokenURI(tokenId).
       then ( (uri: any) =>{
         setTokenUri(uri)
@@ -72,9 +72,9 @@ export const useTokenCount = () : number => {
 }
     
 
-export const useTokenMetaData = (tokenId: number) : any => {
+export const useTokenMetaData = (contractAddress: string, tokenId: number) : any => {
   const [tokenMetadata, setTokenMetadata] = useState()
-  const tokenUri = useTokenUri(tokenId)
+  const tokenUri = useTokenUri(contractAddress, tokenId)
   useEffect(() => {
     if (tokenUri) {
       axios.get(ipfsToHTTP(tokenUri)).
@@ -130,36 +130,53 @@ export const useTokenMetaData = (tokenId: number) : any => {
 //   return allMetadata
 // }
 
-export const useTokenImage = (tokenId: number) : string => {
-  const metadata = useTokenMetaData(tokenId)
-  console.log('metadata', metadata)
-  if (metadata)
-    console.log("image ",typeof metadata)
-  console.log("---------------------")
+export const useTokenImage = (contractAddress: string, tokenId: number) : string => {
+  const metadata = useTokenMetaData(contractAddress, tokenId)
+  // console.log('metadata', metadata)
+  // if (metadata)
+  //   console.log("image ",typeof metadata)
+  // console.log("---------------------")
   return metadata ? ipfsToHTTP(metadata.image as string) : "";
 }
 
-const isAccountToken = async (provider: any, accountAddress: string, tokenId: number) => {
-  const nftContract = getEthersNftContract(provider)
+export const useNFTtitle = (
+  contractAddress?: string,
+  tokenId?: number,
+) : string | undefined => {
+  if(!contractAddress || !tokenId) return;
+  const [title, setTitle] = useState<string>("");
+  const metadata = useTokenMetaData(contractAddress, tokenId);
+  if(metadata.title) setTitle(metadata.title);
+  return title;
+}
+
+const isAccountToken = async (
+  provider: any,
+  accountAddress: string,
+  contractAddress:string,
+  tokenId: number
+) => {
+  const nftContract = getEthersNftContract(contractAddress, provider)
   const owner = await nftContract.ownerOf(tokenId);
   return owner === accountAddress;
 }
 
 const buidAccountTokens = async (provider: any, accountAddress: string, setAccountTokens: any) => {
-  const nftContract = getEthersNftContract(provider)
+  const nftContract = getEthersNftContract(fallbackContractAddress, provider)
   const tokenCount = await nftContract.totalSupply();
   let promises = [];
-  const init = 5;
-  for (let i = init; i < tokenCount; i++) {
-    promises.push(isAccountToken(provider, accountAddress, i));
+  // const init = 5;
+  for (let i = 0; i < tokenCount; i++) {
+    promises.push(isAccountToken(provider, accountAddress, fallbackContractAddress ,i));
   }
   const tokensBools = await Promise.all(promises);
-  const tokens = tokensBools.map((p, i) =>  p ? i+init : -1);
+  const tokens = tokensBools.map((p, i) =>  p ? i : -1);
   const tokensFiltered = tokens.filter(t => t > 0);
   setAccountTokens(tokensFiltered);
 }
 
-export const useAccountTokens = (accountAdress: string) : number[] => {
+export const useAccountTokens = (accountAdress: string | undefined) : number[] | undefined => {
+  if(!accountAdress) return;
   const [accountTokens, setAccountTokens] = useState<number[]>([])
   const provider = useProvider();
   const [contractAddress, contractABI] = getContractData();
@@ -181,9 +198,10 @@ export const useAccountTokens = (accountAdress: string) : number[] => {
 }
 
 export const useMktPlaceAssets = () : any[] => {
-  // const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
+  const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
   const [assets, setAssets] = useState<any[]>([]);
   const [contractAddress, contractABI] = getMktPlaceData();
+  console.log('mktplaceAddress',contractAddress);
   const { data: _assets, isError, isLoading } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: contractABI as any,
@@ -198,16 +216,17 @@ export const useMktPlaceAssets = () : any[] => {
   return assets;
 }
 
-export const useLoans = (address: string) : any[] => {
+export const useLoans = (accountAddress: string | undefined) : any[] | undefined => {
+  if(!accountAddress) return;
   const [loans, setLoans] = useState<any[]>([]);
   const abi = [
-    'function getLoansByContract(address contract_)'
+    'function getLoans()'
   ];
   const { data: _loans, isError, isLoading } = useContractRead({
-    address: address as `0x${string}`,
+    address: accountAddress as `0x${string}`,
     abi: abi as any,
-    functionName: 'getLoansByContract',
-    args: [contractAddress],
+    functionName: 'getLoans',
+    args: [],
     watch: true,
   });
   useEffect(() => {
@@ -216,6 +235,70 @@ export const useLoans = (address: string) : any[] => {
   },[_loans]);
   return loans;
 }
+
+export const getNFTobj = (
+  context: string,
+  accountAddress?: string,
+  index?: number
+) : any | undefined=> {
+  if(!index) return
+  let assets: any;
+  if(context=='borrowed') assets = useLoans(accountAddress);
+  else if(context=='explore') assets = useMktPlaceAssets();
+  else {
+    console.log('error: missing context')
+    return
+  }
+  return assets[index];
+}
+
+// export const getTokenContractAddress = (
+//   accountAddress: string,
+//   context: string,
+//   index?: number
+// ) : string | undefined=> {
+//   if(!index) return
+//   let assets: any;
+//   if(context=='borrowed') assets = useLoans(accountAddress);
+//   else if(context=='explore') assets = useMktPlaceAssets();
+//   else {
+//     console.log('error: missing context')
+//     return
+//   }
+//   return assets[index].contract_;
+// }
+
+// export const getTokenId = (accountAddress: string,
+//   context: string,
+//   index?: number
+// ) : number | undefined=> {
+//   if(!index) return
+//   let assets: any;
+//   if(context=='borrowed') assets = useLoans(accountAddress);
+//   else if(context=='explore') assets = useMktPlaceAssets();
+//   else {
+//     console.log('error: missing context')
+//     return
+//   }
+//   return assets[index].id;
+// }
+
+// export const getTokenLender = (accountAddress: string,
+//   context: string,
+//   index?: number
+// ) : string | undefined=> {
+//   if(!index) return
+//   let assets: any;
+//   if(context=='borrowed') assets = useLoans(accountAddress);
+//   else if(context=='explore') assets = useMktPlaceAssets();
+//   else {
+//     console.log('error: missing context')
+//     return
+//   }
+//   return assets[index].lender;
+// }
+
+
 // export function useTokenId () {
 //   const router = useRouter()
 //   const {tokenId} = router.query

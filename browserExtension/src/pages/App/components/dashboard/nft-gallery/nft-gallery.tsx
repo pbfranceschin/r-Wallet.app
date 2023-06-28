@@ -6,13 +6,22 @@ import classNames from 'classnames';
 export interface NFTGalleryProps {
     className?: string;
     setIsNFTOpen: any;
+    setIndex:any;
+    setContract: any;
+    setTokenId: any;
+    context: string;
 }
+//setIndex, setContract, setTokenId, contextts
 
 /**
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
  */
-export const NFTGallery = ({ className, setIsNFTOpen }: NFTGalleryProps) => {
+export const NFTGallery = ({
+    className, setIsNFTOpen,
+    setIndex, setContract,
+    setTokenId, context
+}: NFTGalleryProps) => {
     return (
         <div className={styles['gallery-section']}>
             <span className={styles['gallery-container']}>
@@ -21,7 +30,14 @@ export const NFTGallery = ({ className, setIsNFTOpen }: NFTGalleryProps) => {
                         <span className={styles['gallery-header-name']}></span>
                     </div>
                 </div>
-                <CardGrid className={styles['card-grid']} setIsNFTOpen={setIsNFTOpen} />
+                <CardGrid 
+                className={styles['card-grid']}
+                setIsNFTOpen={setIsNFTOpen}
+                setIndex={setIndex}
+                setContract={setContract}
+                setTokenId={setTokenId}
+                context={context}
+                />
             </span>
         </div>
     );

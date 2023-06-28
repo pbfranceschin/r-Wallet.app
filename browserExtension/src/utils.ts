@@ -5,6 +5,7 @@ import NFT from "./NFT.json";
 import MarketPlace from "./MarketPlace.json";
 import BaseMarketPlace from "./BaseMarketPlace.json";
 import { ContractInterface, Contract } from '@ethersproject/contracts';
+import { erc721ABI } from "wagmi";
 
 interface NFT {
   address: string;
@@ -25,10 +26,10 @@ export const getContractData = (): [string, ContractInterface] => {
 };
 
 // receives an ethers provider and returns a contract instance
-export const getEthersNftContract = (provider: Provider) => {
+export const getEthersNftContract = (address: string, provider: Provider) => {
   const contract = new ethers.Contract(
-    contractAddress,
-    contractABI,
+    address,
+    erc721ABI,
     provider
   );
   return contract
