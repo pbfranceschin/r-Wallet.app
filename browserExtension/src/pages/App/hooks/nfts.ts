@@ -146,7 +146,7 @@ export const useNFTtitle = (
   if(!contractAddress || !tokenId) return;
   const [title, setTitle] = useState<string>("");
   const metadata = useTokenMetaData(contractAddress, tokenId);
-  if(metadata.title) setTitle(metadata.title);
+  if(metadata) setTitle(metadata.title);
   return title;
 }
 

@@ -32,17 +32,17 @@ export const CardGrid = ({
     const activeAccount = useBackgroundSelector(getActiveAccount);
     const [tokens, setTokens] = useState<any[]>();
     const [error, setError] = useState<string>();
-    // const [userTokens, setUserTokens] = useState<any>();
-    // const [borrowedTokens, setBorrowedTokens] = useState<any>();
-    // const [mktPlaceTokens, setMktPlaceTokens] = useState<any>();
+    const _owned = useAccountTokens(activeAccount);
+    const _borrowed = useLoans(activeAccount);
+    const _mktPlace = useMktPlaceAssets();
     useEffect(() => {
         console.log('render')
         if(context=='owned') 
-            setTokens(useAccountTokens(activeAccount));
+            setTokens(_owned);
         else if(context=='borrowed') 
-            setTokens(useLoans(activeAccount))
+            setTokens(_borrowed)
         else if(context=='explore')
-            setTokens(useMktPlaceAssets());
+            setTokens(_mktPlace);
         else setError('error: missing context')
         console.log('tokens', tokens);
     });

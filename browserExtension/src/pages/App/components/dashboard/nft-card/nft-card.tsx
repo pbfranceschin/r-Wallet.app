@@ -41,6 +41,13 @@ const onNFTCardClick = (
   } else throw new Error('missing context'); 
 }
 
+let _image: string | undefined;
+let _title: string | undefined;
+let _price: number | undefined;
+let assets: any;
+let _contract: string;
+let _id: number;
+
 /**
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
@@ -60,35 +67,29 @@ export const NFTCard = ({
     const [image, setImage] = useState<string>();
     const [title, setTitle] = useState<string>();
     const [price, setPrice] = useState<number>();
-    
-    useEffect(() => {
-        if(context=='owned'){
-            if(contract && id) {
-                setImage(useTokenImage(contract, id));
-                setTitle(useNFTtitle(contract, id));
-            } else console.log("missing props: 'contract' or 'id'");
+
+    if(contract && id) {
+        _image = useTokenImage(contract, id);
+        _title = useNFTtitle(contract, id);
+    }
+    if(index) {
+        if(context=='borrowed')
+            assets = useLoans(acctiveAccount);
+        else if(context=='explore') {
+            assets = useMktPlaceAssets();
+            _price = assets[index]?.price;
         }
-        else if(context == 'borrowed' || context == 'explore') {
-            if(index) {
-                let assets: any;
-                let _contract: string;
-                let _id: number;
-                let _price: number | undefined;
-                if(context=='borrowed') assets = useLoans(acctiveAccount);
-                else if(context=='explore') {
-                    assets = useMktPlaceAssets();
-                    _price = assets[index]?.price;
-                }
-                else console.log('missing context');
-                
-                _contract = assets[index]?.contract_;
-                _id = assets[index]?.id;
-                const metadata = useTokenMetaData(_contract, _id);
-                setTitle(metadata.title);
-                setImage(metadata.image);
-                setPrice(_price);
-            } else console.log('missing props');
-        } else console.log('missing context');
+        _contract = assets[index]?.contract_;
+        _id = assets[index]?.id;
+        const metadata = useTokenMetaData(_contract, _id);
+        _title = metadata?.title;
+        _image = metadata?.image;
+    }
+    
+    useEffect(() => {   
+        setImage(_image);
+        setTitle(_title);  
+        setPrice(_price);
     });
     
     console.log('image', image);
