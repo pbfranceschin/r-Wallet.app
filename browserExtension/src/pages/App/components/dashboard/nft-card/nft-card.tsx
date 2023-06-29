@@ -68,23 +68,25 @@ export const NFTCard = ({
     const [title, setTitle] = useState<string>();
     const [price, setPrice] = useState<number>();
 
-    if(contract && id) {
-        _image = useTokenImage(contract, id);
-        _title = useNFTtitle(contract, id);
-    }
-    if(index) {
-        if(context=='borrowed')
-            assets = useLoans(acctiveAccount);
-        else if(context=='explore') {
-            assets = useMktPlaceAssets();
-            _price = assets[index]?.price;
+    useEffect(() => {
+        if(contract && id) {
+            _image = useTokenImage(contract, id);
+            _title = useNFTtitle(contract, id);
         }
-        _contract = assets[index]?.contract_;
-        _id = assets[index]?.id;
-        const metadata = useTokenMetaData(_contract, _id);
-        _title = metadata?.title;
-        _image = metadata?.image;
-    }
+        if(index) {
+            if(context=='borrowed')
+                assets = useLoans(acctiveAccount);
+            else if(context=='explore') {
+                assets = useMktPlaceAssets();
+                _price = assets[index]?.price;
+            }
+            _contract = assets[index]?.contract_;
+            _id = assets[index]?.id;
+            const metadata = useTokenMetaData(_contract, _id);
+            _title = metadata?.title;
+            _image = metadata?.image;
+        }
+    },[contract, id, index]);
     
     useEffect(() => {   
         setImage(_image);
