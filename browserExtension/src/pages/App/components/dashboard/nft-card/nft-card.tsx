@@ -90,14 +90,15 @@ export const NFTCard = ({
         setImage(_image);
         setTitle(_title);  
         setPrice(_price);
-    });
+    },[]);
     
     console.log('image', image);
     
     
     return (
         <div className={classNames(styles.root, className)}>
-            <div className={styles.card} onClick={() => onNFTCardClick(
+            <div className={styles.card} 
+            onClick={() => onNFTCardClick(
                 contract,
                 id, index,
                 setIsNFTOpen,
@@ -105,7 +106,8 @@ export const NFTCard = ({
                 setContract,
                 setTokenId,
                 context
-                )}>
+                )}
+            >
                 <div className={styles['container-card-image']}>
                     <div className={classNames(styles['card-image'], styles['image-cover-full'])}>
                         <img
