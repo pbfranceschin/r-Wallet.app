@@ -26,7 +26,7 @@ export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardP
   const [contract, setContract] = useState<string>();
   const [tokenId, setTokenId] = useState<number>();
   const initialContext = 'owned';
-  const context = useRef(initialContext);
+  const [context, setContext] = useState<string>(initialContext);
   const activeNetwork = useBackgroundSelector(getActiveNetwork);
   const address = activeAccount? activeAccount as string : '';
   const accountData: AccountData | 'loading' = useBackgroundSelector((state) =>
@@ -40,16 +40,19 @@ export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardP
   return (
     <div>
       {isNFTOpen && <NFTDialog
+      contract={contract}
+      id={tokenId}
+      index={index}
       setIsNFTOpen={setIsNFTOpen} 
-      context={context.current}
+      context={context}
       activeAccount={activeAccount}
       />}
       <div className={styles.layout}>
           <div className={styles.sidebar}>
-            <ProfileSectionContainer activeAccount={activeAccount}/>
+            <ProfileSectionContainer activeAccount={activeAccount} setContext={setContext}/>
           </div>
           <div className={styles.topbar}>
-            <div className={styles['topbar-button']}>Explore</div>
+            <div className={styles['topbar-button']} onClick={() => setContext('explore')}>Explore</div>
           </div>
           <div className={styles.gallery}>
             <NFTGallery
@@ -57,7 +60,7 @@ export const ProfileDashboard = ({ className, activeAccount }: ProfileDashboardP
             setIndex={setIndex}
             setContract={setContract}
             setTokenId={setTokenId}
-            context={context.current}
+            context={context}
             />
           </div>
       </div>

@@ -6,17 +6,18 @@ import classNames from 'classnames';
 
 export interface TabMenuProps {
     className?: string;
+    setContext: any;
 }
 
 /**
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
  */
-export const TabMenu = ({ className }: TabMenuProps) => {
+export const TabMenu = ({ className, setContext }: TabMenuProps) => {
     return (
       <div>
-        <TabItemSelected name="Owned"/>
-        <TabItem name="Borrowed"/>
+        <TabItemSelected name="Owned" setContext={setContext}/>
+        <TabItem name="Borrowed" setContext={setContext}/>
       </div>
     );
 };

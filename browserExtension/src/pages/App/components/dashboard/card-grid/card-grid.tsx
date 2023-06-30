@@ -51,7 +51,7 @@ export const CardGrid = ({
             tokens.map((t: any, i: number) => {
                 
                 return ( 
-                    <div className={styles['card-grid-container']}>
+                    <div className={styles['card-grid-container']} key={i}>
                         {context=='owned' && 
                         <NFTCard
                         propImage="https://wixplosives.github.io/codux-assets-storage/add-panel/image-placeholder.jpg"

@@ -79,7 +79,7 @@ export const useTokenMetaData = (contractAddress: string, tokenId: number) : any
     if (tokenUri) {
       axios.get(ipfsToHTTP(tokenUri)).
       then(request => {
-        console.log(request.data)
+        console.log('data', request.data)
         // transform data from string to object
         // const data = JSON.parse(request.data)
         const data = request.data;
@@ -132,11 +132,11 @@ export const useTokenMetaData = (contractAddress: string, tokenId: number) : any
 
 export const useTokenImage = (contractAddress: string, tokenId: number) : string => {
   const metadata = useTokenMetaData(contractAddress, tokenId)
-  // console.log('metadata', metadata)
+  console.log('metadata', metadata)
   // if (metadata)
   //   console.log("image ",typeof metadata)
   // console.log("---------------------")
-  return metadata ? ipfsToHTTP(metadata.image as string) : "";
+  return metadata? ipfsToHTTP(metadata.image as string) : "";
 }
 
 export const useNFTtitle = (
@@ -146,9 +146,29 @@ export const useNFTtitle = (
   if(!contractAddress || !tokenId) return;
   const [title, setTitle] = useState<string>("");
   const metadata = useTokenMetaData(contractAddress, tokenId);
-  if(metadata) setTitle(metadata.title);
+  // console.log('metadata (title hook)', metadata);
+  useEffect(() => {
+    if(metadata) setTitle(metadata.description);
+  },[contractAddress, tokenId, metadata]);
+  // console.log('title (hook)', title);
   return title;
 }
+
+export const useNFTname = (
+  contractAddress?: string,
+  tokenId?: number,
+) : string | undefined => {
+  if(!contractAddress || !tokenId) return;
+  const [name, setName] = useState<string>("");
+  const metadata = useTokenMetaData(contractAddress, tokenId);
+  // console.log('metadata (title hook)', metadata);
+  useEffect(() => {
+    if(metadata) setName(metadata.name);
+  },[contractAddress, tokenId, metadata]);
+  // console.log('title (hook)', title);
+  return name;
+}
+
 
 const isAccountToken = async (
   provider: any,

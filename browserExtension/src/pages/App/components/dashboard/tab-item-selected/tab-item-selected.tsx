@@ -5,15 +5,16 @@ import classNames from 'classnames';
 export interface TabItemSelectedProps {
     className?: string;
     name: string;
+    setContext: any;
 }
 
 /**
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
  */
-export const TabItemSelected = ({ className, name }: TabItemSelectedProps) => {
+export const TabItemSelected = ({ className, name, setContext }: TabItemSelectedProps) => {
     return (
-        <span className={styles['tab-item-button-selected']}>
+        <span className={styles['tab-item-button-selected']} onClick={() => setContext('owned')}>
             <div className={styles['tab-item-container-selected']}>
                 <div className={styles['tab-item-name-selected']}>
                     {name}

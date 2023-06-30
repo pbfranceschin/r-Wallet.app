@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './nft-card.module.scss';
 import classNames from 'classnames';
 import { useNFTtitle, useTokenImage, useLoans, useTokenMetaData, useMktPlaceAssets } from '../../../hooks/nfts';
@@ -67,8 +67,8 @@ export const NFTCard = ({
     const [image, setImage] = useState<string>();
     const [title, setTitle] = useState<string>();
     const [price, setPrice] = useState<number>();
-
-    useEffect(() => {
+    const initializer = useRef<Boolean>();
+    
         if(contract && id) {
             _image = useTokenImage(contract, id);
             _title = useNFTtitle(contract, id);
@@ -78,23 +78,26 @@ export const NFTCard = ({
                 assets = useLoans(acctiveAccount);
             else if(context=='explore') {
                 assets = useMktPlaceAssets();
+                console.log('nft', assets[index]);
+                console.log('index', index);
                 _price = assets[index]?.price;
             }
             _contract = assets[index]?.contract_;
             _id = assets[index]?.id;
-            const metadata = useTokenMetaData(_contract, _id);
+            let metadata: any;
+            if(contract) metadata = useTokenMetaData(_contract, _id);
             _title = metadata?.title;
             _image = metadata?.image;
         }
-    },[contract, id, index]);
-    
+        
     useEffect(() => {   
         setImage(_image);
         setTitle(_title);  
         setPrice(_price);
-    },[]);
+    },[_image, _title, _price]);
     
-    console.log('image', image);
+    console.log('image', _image);
+    console.log('_title', _title);
     
     
     return (
@@ -108,7 +111,7 @@ export const NFTCard = ({
                 setContract,
                 setTokenId,
                 context
-                )}
+            )}
             >
                 <div className={styles['container-card-image']}>
                     <div className={classNames(styles['card-image'], styles['image-cover-full'])}>
@@ -124,7 +127,7 @@ export const NFTCard = ({
                     <h3 className={styles['card-title']}>{title}</h3>
                     {price && (
                       <div className={styles['card-price']}>
-                        <p>{price} ETH </p>
+                        <p>{price.toString()} ETH </p>
                       </div>
                     )}
                 </div>

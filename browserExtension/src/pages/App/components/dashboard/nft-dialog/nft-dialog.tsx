@@ -4,7 +4,8 @@ import { DialogExploreDescription } from '../dialog-explore-description/dialog-e
 import { DialogOwnedDescription } from '../dialog-owned-description/dialog-owned-description';
 import styles from './nft-dialog.module.scss';
 import classNames from 'classnames';
-import { getNFTobj, getTokenContractAddress, getTokenId, useNFTtitle } from '../../../hooks/nfts';
+import { getNFTobj, useNFTtitle, useNFTname, useTokenImage, useTokenMetaData } from '../../../hooks/nfts';
+import { Context } from 'wagmi';
 
 export interface NFTDialogProps {
     className?: string;
@@ -15,6 +16,12 @@ export interface NFTDialogProps {
     id?: number;
     index?: number;
 }
+
+let _image: string | undefined;
+let _price: number;
+let nft: any;
+const propImage = "https://dl.openseauserdata.com/cache/originImage/files/9d6b9f6ef3d8b0b0f08481be0a0fd2f8.png";
+
 
 /**
  * This component was created using Codux's Default new component template.
@@ -29,12 +36,16 @@ export const NFTDialog = ({
     contract,
     id
 }: NFTDialogProps) => {
+    const [error, setError] = useState<string>();
     const [isOwned, setIsOwned] = useState<boolean>(false);
     const [isBorrowed, setIsBorrowed] = useState<boolean>(false);
-    const [title, setTitle] = useState<string>('');
+    const [title, setTitle] = useState<string>();
+    const [image, setImage] = useState<string>();
     const [price, setPrice] = useState<number>();
     const [lender, setLender] = useState<string>();
     const [endTime, setEndTime] = useState<number>(-1);
+    const [name, setName] = useState<string>();
+    
     const onCloseDialog = () => {
         setIsNFTOpen(false);
     };
@@ -42,22 +53,27 @@ export const NFTDialog = ({
     const stopPropagation = (e: any) => {
         e.stopPropagation();
     };
+
+    if(contract && id){
+        _image = useTokenImage(contract, id);
+    } else if(index) {
+        nft = getNFTobj(context, activeAccount, index)
+        _image = useTokenImage(nft.contract_ , nft.id);
+    } else console.log('error: missing props');
+    
+    
     useEffect(() => {
-        if(context == 'owned') 
+        setImage(_image);
+        console.log('image dialog', _image);
+        if(context == 'owned'){ 
             setIsOwned(true);
-        else{
-            const _NFT = getNFTobj(context, activeAccount, index);
-            const _title = useNFTtitle(_NFT.contract_, _NFT.id);
-            setTitle(_title? _title : '');
-            if(context == 'borrowed') {
-                setIsBorrowed(true);
-                setEndTime(_NFT.endTime);
-            } else if(context == 'explore'){
-                setPrice(_NFT.price);
-                setLender(_NFT.lender);
-            } else console.log('missing context');
         }
-    });
+        else if(context == 'borrowed') {
+                setIsBorrowed(true);
+        } else if(context == 'explore'){
+                setPrice(nft.price);
+        } else setError('missing context');
+    }, [context, nft, _image]);
 
 
     return (
@@ -67,7 +83,7 @@ export const NFTDialog = ({
                     <div className={styles['nft-image-container']}>
                         <div className={styles['nft-image-preview']}>
                             <img
-                                src="https://dl.openseauserdata.com/cache/originImage/files/9d6b9f6ef3d8b0b0f08481be0a0fd2f8.png"
+                                src={image? image : propImage}
                                 className={styles['image']}
                             />
                         </div>
@@ -75,19 +91,18 @@ export const NFTDialog = ({
                     <div className={styles['nft-description-container']}>
                         {isOwned ? (
                           <DialogOwnedDescription 
-                          address={contract}
+                          contract={contract}
                           id={id}
                           />
                         ) : isBorrowed ? (
                           <DialogBorrowedDescription
-                          title={title}
-                          endTime={endTime}
+                          activeAccount={activeAccount}
+                          context={context}
                           index={index}
                           />
                         ) : (
                           <DialogExploreDescription
                           price={price}
-                          title={title}
                           lender={lender}
                           index={index}
                           />
