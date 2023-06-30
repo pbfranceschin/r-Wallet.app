@@ -81,16 +81,20 @@ export const NFTCard = ({
                 console.log('nft', assets[index]);
                 console.log('index', index);
                 _price = assets[index]?.price;
+                console.log('_price', price);
             }
             _contract = assets[index]?.contract_;
             _id = assets[index]?.id;
+            console.log('_contract', _contract)
+            console.log('_id', _id) 
             let metadata: any;
-            if(contract) metadata = useTokenMetaData(_contract, _id);
+            if(_contract && _id) metadata = useTokenMetaData(_contract, _id);
             _title = metadata?.title;
             _image = metadata?.image;
         }
         
     useEffect(() => {   
+        console.log('card render')
         setImage(_image);
         setTitle(_title);  
         setPrice(_price);
@@ -98,6 +102,7 @@ export const NFTCard = ({
     
     console.log('image', _image);
     console.log('_title', _title);
+    
     
     
     return (
