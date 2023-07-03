@@ -26,6 +26,7 @@ import { ProfileDashboard } from '../../components/dashboard/profile-dashboard/p
 // }
 
 const Home = () => {
+  console.log('update 2')
   const activeAccount = useBackgroundSelector(getActiveAccount);
   console.log('activeAccount', activeAccount);
   const assets = useMktPlaceAssets();

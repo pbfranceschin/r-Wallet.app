@@ -58,6 +58,7 @@ export const CardGrid = ({
                         acctiveAccount={activeAccount}
                         contract={fallbackContractAddress}
                         id={t}
+                        index={i}
                         setIsNFTOpen={setIsNFTOpen}
                         setIndex={setIndex}
                         setContract={setContract}

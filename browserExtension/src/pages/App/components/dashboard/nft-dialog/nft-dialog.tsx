@@ -17,7 +17,8 @@ export interface NFTDialogProps {
     index?: number;
 }
 
-let _image: string | undefined;
+let imageOwn: string | undefined;
+let imageBorrExp: string | undefined;
 let _price: number;
 let nft: any;
 const propImage = "https://dl.openseauserdata.com/cache/originImage/files/9d6b9f6ef3d8b0b0f08481be0a0fd2f8.png";
@@ -54,26 +55,26 @@ export const NFTDialog = ({
         e.stopPropagation();
     };
 
-    if(contract && id){
-        _image = useTokenImage(contract, id);
-    } else if(index) {
-        nft = getNFTobj(context, activeAccount, index)
-        _image = useTokenImage(nft.contract_ , nft.id);
-    } else console.log('error: missing props');
+    
+    imageOwn = useTokenImage(contract, id);
+    nft = getNFTobj(context, activeAccount, index)
+    imageBorrExp = useTokenImage(nft.contract_ , nft.id);
+    
     
     
     useEffect(() => {
-        setImage(_image);
-        console.log('image dialog', _image);
         if(context == 'owned'){ 
             setIsOwned(true);
+            setImage(imageOwn)
         }
         else if(context == 'borrowed') {
                 setIsBorrowed(true);
+                setImage(imageBorrExp);
         } else if(context == 'explore'){
                 setPrice(nft.price);
+                setImage(imageBorrExp);
         } else setError('missing context');
-    }, [context, nft, _image]);
+    }, [context, imageOwn, imageBorrExp, nft]);
 
 
     return (
@@ -102,9 +103,8 @@ export const NFTDialog = ({
                           />
                         ) : (
                           <DialogExploreDescription
-                          price={price}
-                          lender={lender}
                           index={index}
+                          activeAccount={activeAccount}
                           />
                         )}
                     </div>

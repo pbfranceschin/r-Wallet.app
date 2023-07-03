@@ -24,10 +24,10 @@ export const DialogOwnedDescription = ({ className, contract, id }: DialogOwnedD
     const [maxDuration, setMaxDuration] = useState<number>();
     const [title, setTitle] = useState<string>();
     const [name, setName] = useState<string>();    
-    if(contract && id){
-        _title = useNFTtitle(contract, id);
-        _name = useNFTname(contract, id);
-    }
+    const [price, setPrice] = useState<number>();
+    _title = useNFTtitle(contract, id);
+    _name = useNFTname(contract, id);
+
 
     useEffect(() => {
         setTitle(_title);

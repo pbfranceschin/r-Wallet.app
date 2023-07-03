@@ -9,7 +9,7 @@ import { getNFTobj, useNFTname, useNFTtitle } from '../../../hooks/nfts';
 export interface DialogExploreDescriptionProps {
     className?: string;
     index?: number;
-    activeAccount: string;
+    activeAccount?: string;
 }
 
 let nft: any;

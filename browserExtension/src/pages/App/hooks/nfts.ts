@@ -15,6 +15,7 @@ import {
   ipfsToHTTP,
   getTokenMetadata,
 } from '../../../utils'
+import { isAddress } from 'ethers/lib/utils.js';
 
 const [fallbackContractAddress] = getContractData();
 // const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
@@ -42,18 +43,24 @@ const [fallbackContractAddress] = getContractData();
 //   return tokenUri
 // }
 
-export const useTokenUri = (contract: string, tokenId: number) : any => {
+export const useTokenUri = (contract?: string, tokenId?: number) : any => {
+  // if(!contract) return;
   const [tokenUri, setTokenUri] = useState()
   const provider = useProvider()
   useEffect(() => {
-    if (provider) {
+    if (provider && contract) {
       const nftContract = getEthersNftContract(contract, provider)
-      nftContract.tokenURI(tokenId).
-      then ( (uri: any) =>{
-        setTokenUri(uri)
-      })
+      try {
+        nftContract.tokenURI(tokenId).
+        then ( (uri: any) =>{
+          setTokenUri(uri)
+        })
+      } catch (error) {
+        console.log(error)
+        return
+      }
     }
-  },[provider, tokenId])
+  },[provider, tokenId, contract])
   return tokenUri
 }
 
@@ -72,7 +79,8 @@ export const useTokenCount = () : number => {
 }
     
 
-export const useTokenMetaData = (contractAddress: string, tokenId: number) : any => {
+export const useTokenMetaData = (contractAddress?: string, tokenId?: number) : any => {
+  // if(!contractAddress) return;
   const [tokenMetadata, setTokenMetadata] = useState()
   const tokenUri = useTokenUri(contractAddress, tokenId)
   useEffect(() => {
@@ -130,7 +138,7 @@ export const useTokenMetaData = (contractAddress: string, tokenId: number) : any
 //   return allMetadata
 // }
 
-export const useTokenImage = (contractAddress: string, tokenId: number) : string => {
+export const useTokenImage = (contractAddress?: string, tokenId?: number) : string => {
   const metadata = useTokenMetaData(contractAddress, tokenId)
   console.log('metadata', metadata)
   // if (metadata)
@@ -143,7 +151,7 @@ export const useNFTtitle = (
   contractAddress?: string,
   tokenId?: number,
 ) : string | undefined => {
-  if(!contractAddress || !tokenId) return;
+  // if(!contractAddress || !tokenId) return;
   const [title, setTitle] = useState<string>("");
   const metadata = useTokenMetaData(contractAddress, tokenId);
   // console.log('metadata (title hook)', metadata);
@@ -263,14 +271,18 @@ export const getNFTobj = (
 ) : any | undefined=> {
   if(!index) return
   let assets: any;
-  if(context=='borrowed') assets = useLoans(accountAddress);
-  else if(context=='explore') assets = useMktPlaceAssets();
+  const assetsLoan = useLoans(accountAddress);
+  const assetsMkt = useMktPlaceAssets();
+  if(context=='borrowed') assets = assetsLoan; 
+  else if(context=='explore') assets = assetsMkt;
   else {
     console.log('error: missing context')
     return
   }
   return assets[index];
 }
+
+// export const useContractAndId(context: sring, )
 
 // export const getTokenContractAddress = (
 //   accountAddress: string,

@@ -8,7 +8,7 @@ export interface NFTCardProps {
     className?: string;
     contract?: string;
     id?: number;
-    index?: number;
+    index: number;
     propImage?: string;
     acctiveAccount: string | undefined;
     setIsNFTOpen: any;
@@ -41,10 +41,15 @@ const onNFTCardClick = (
   } else throw new Error('missing context'); 
 }
 
-let _image: string | undefined;
-let _title: string | undefined;
+let imageOwn: string | undefined;
+let imageBorr: string | undefined;
+let imageExp: string | undefined;
+let titleOwn: string | undefined;
+let titleBorr: string | undefined;
+let titleExp: string | undefined;
 let _price: number | undefined;
-let assets: any;
+let assetsBorr: any;
+let assetsMkt: any;
 let _contract: string;
 let _id: number;
 
@@ -69,39 +74,76 @@ export const NFTCard = ({
     const [price, setPrice] = useState<number>();
     const initializer = useRef<Boolean>();
     
-        if(contract && id) {
-            _image = useTokenImage(contract, id);
-            _title = useNFTtitle(contract, id);
-        }
-        if(index) {
-            if(context=='borrowed')
-                assets = useLoans(acctiveAccount);
-            else if(context=='explore') {
-                assets = useMktPlaceAssets();
-                console.log('nft', assets[index]);
-                console.log('index', index);
-                _price = assets[index]?.price;
-                console.log('_price', price);
-            }
-            _contract = assets[index]?.contract_;
-            _id = assets[index]?.id;
-            console.log('_contract', _contract)
-            console.log('_id', _id) 
-            let metadata: any;
-            if(_contract && _id) metadata = useTokenMetaData(_contract, _id);
-            _title = metadata?.title;
-            _image = metadata?.image;
-        }
+    imageOwn = useTokenImage(contract, id);
+    console.log('imageOwn', imageOwn);
+    titleOwn = useNFTtitle(contract, id);
+    assetsBorr = useLoans(acctiveAccount);
+    imageBorr = useTokenImage(
+        assetsBorr[index] ? assetsBorr[index].contract_ : "",
+        assetsBorr[index] ? assetsBorr[index].id : 0
+    );
+    
+    titleBorr = useNFTtitle(
+        assetsBorr[index] ? assetsBorr[index].contract_ : "",
+        assetsBorr[index] ? assetsBorr[index].id : 0
+    );
+    assetsMkt = useMktPlaceAssets();
+    imageExp = useTokenImage(
+        assetsMkt[index] ? assetsMkt[index].contract_ : "",
+        assetsMkt[index] ? assetsMkt[index].id : 0
+    );
+    titleExp = useNFTtitle(
+        assetsMkt[index] ? assetsMkt[index].contract_ : "",
+        assetsMkt[index] ? assetsMkt[index].id : 0
+    );
+    _price = assetsMkt[index] ? assetsMkt[index].price : 0; 
+        // if(contract && id) {
+
+        // }
+        // if(index) {
+        //     if(context=='borrowed')
+                
+        //     else if(context=='explore') {
+        //         assets = useMktPlaceAssets();
+        //         console.log('nft', assets);
+        //         console.log('index', index);
+        //         _price = assets[index]?.price;
+        //         console.log('_price', price);
+        //     }
+        //     _contract = assets[index]?.contract_;
+        //     _id = assets[index]?.id;
+        //     console.log('_contract', _contract)
+        //     console.log('_id', _id) 
+        //     // let metadata: any;
+        //     const metadata = useTokenMetaData(_contract, _id);
+        //     _title = metadata?.title;
+        //     _image = metadata?.image;
+        // }
         
     useEffect(() => {   
         console.log('card render')
-        setImage(_image);
-        setTitle(_title);  
-        setPrice(_price);
-    },[_image, _title, _price]);
+        if(context == 'owned') {
+            setImage(imageOwn);
+            setTitle(titleOwn)
+        } else if(context == 'borrowed') {
+            setImage(imageBorr);
+            setTitle(titleBorr);
+        } else if(context=='explore') {
+            setImage(imageExp);
+            setTitle(titleExp);
+            setPrice(_price);
+        }
+        
+    },[
+        context,
+        imageOwn, titleOwn,
+        imageBorr, titleBorr,
+        imageExp, titleExp,
+        _price
+    ]);
     
-    console.log('image', _image);
-    console.log('_title', _title);
+    // console.log('image', _image);
+    // console.log('_title', _title);
     
     
     
