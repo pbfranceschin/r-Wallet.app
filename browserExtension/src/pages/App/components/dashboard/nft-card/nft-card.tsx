@@ -96,32 +96,10 @@ export const NFTCard = ({
         assetsMkt[index] ? assetsMkt[index].contract_ : "",
         assetsMkt[index] ? assetsMkt[index].id : 0
     );
-    _price = assetsMkt[index] ? assetsMkt[index].price : 0; 
-        // if(contract && id) {
-
-        // }
-        // if(index) {
-        //     if(context=='borrowed')
-                
-        //     else if(context=='explore') {
-        //         assets = useMktPlaceAssets();
-        //         console.log('nft', assets);
-        //         console.log('index', index);
-        //         _price = assets[index]?.price;
-        //         console.log('_price', price);
-        //     }
-        //     _contract = assets[index]?.contract_;
-        //     _id = assets[index]?.id;
-        //     console.log('_contract', _contract)
-        //     console.log('_id', _id) 
-        //     // let metadata: any;
-        //     const metadata = useTokenMetaData(_contract, _id);
-        //     _title = metadata?.title;
-        //     _image = metadata?.image;
-        // }
+    _price = assetsMkt[index] ? assetsMkt[index].price : 0;
         
     useEffect(() => {   
-        console.log('card render')
+        console.log('card render', index)
         if(context == 'owned') {
             setImage(imageOwn);
             setTitle(titleOwn)
@@ -129,6 +107,7 @@ export const NFTCard = ({
             setImage(imageBorr);
             setTitle(titleBorr);
         } else if(context=='explore') {
+            console.log('imageExp', imageExp)
             setImage(imageExp);
             setTitle(titleExp);
             setPrice(_price);

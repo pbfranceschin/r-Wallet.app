@@ -1,0 +1,41 @@
+{ 
+  "description": "warrior elf",
+  "image": "https://ipfs.filebase.io/ipfs/QmNkPBXX2GqtwT2Y6uSrS2DMY9dY5VcQUywBEdfJF9Ebvv",
+  "name": "emma", 
+  "attributes": [
+    {
+      "trait_type": "type", 
+      "value": "character"
+    }, 
+    {
+      "trait_type": "race", 
+      "value": "elf"
+    }, 
+    {
+      "trait_type": "strength", 
+      "value": 45
+    }, 
+    {
+      "trait_type": "dexterity", 
+      "value": 78
+    }, 
+    {
+      "trait_type": "Stamina", 
+      "value": 64
+    }, 
+    {
+      "trait_type": "courage", 
+      "value": 69
+    }, 
+    {
+      "display_type": "boost_number", 
+      "trait_type": "agressiveness", 
+      "value": 40
+    }, 
+    {
+      "display_type": "boost_percentage", 
+      "trait_type": "level", 
+      "value": 2
+    }
+    ]
+  }

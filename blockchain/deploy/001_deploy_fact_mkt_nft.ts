@@ -10,7 +10,7 @@ const apikey = process.env.INFURA_API_KEY;
 const walletAddress = '0x6711645aB591f86B31CC97667f393A78d01f5Ca0';
 const feeBase = 1000;
 const feeMul = 3;
-// const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789'; // sepolia
+const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789'; // sepolia
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -27,24 +27,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // const entryPoint = (await deployments.get('EntryPoint')).address;
   // console.log('ep:',entryPoint);
   
-  // await deploy('RWalletFactory', {
-  //   from: deployer,
-  //   args: [entryPoint],
-  //   log: true,
-  // });
+  await deploy('RWalletFactory', {
+    from: deployer,
+    args: [entryPoint],
+    log: true,
+  });
 
-  // const RWalletFactory = await deployments.get('RWalletFactory');
+  const RWalletFactory = await deployments.get('RWalletFactory');
   // const RWalletFactoryAddress = '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3';
 
-  // await deploy('BaseMarketPlace', {
-  //   from: deployer,
-  //   args: [
-  //     RWalletFactoryAddress,
-  //     feeBase,
-  //     feeMul
-  //   ],
-  //   log: true
-  // });
+  await deploy('BaseMarketPlace', {
+    from: deployer,
+    args: [
+      RWalletFactory.address,
+      feeBase,
+      feeMul
+    ],
+    log: true
+  });
 
   // if(!pkey || !apikey) throw new Error('missing enviroment');
   await deploy('NFT', {

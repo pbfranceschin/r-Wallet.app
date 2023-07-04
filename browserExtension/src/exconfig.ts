@@ -1,15 +1,22 @@
 // eslint-disable-next-line import/no-anonymous-default-export
+import * as dotenv from 'dotenv';
+dotenv.config({ path: __dirname+'../.env' });
+import contracts from "../contracts/hardhat_contracts.json";
+const networkID = 11155111 // sepolia
+const factory_address = contracts[networkID][0].contracts.RWalletFactory.address;
+const entryPointAddress = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' // sepolia
+
 export default {
   enablePasswordEncryption: false,
   showTransactionConfirmationScreen: true,
-  factory_address: '0x8fA7D1434A90ad1d5FDf461395fA92f69Dc5C9E3',
+  factory_address: factory_address,
   stateVersion: '0.1',
   network: {
-    chainID: '1313161555',
+    chainID: String(networkID),
     family: 'EVM',
-    name: 'Aurora Testnet',
-    provider: 'https://testnet.aurora.dev',
-    entryPointAddress: '0xD2617C1F24884faC6Ed87A0Df8F8c476EeB83199',
+    name: 'Sepolia',
+    provider: `https://sepolia.infura.io/v3/2202743dabe54d42aeaeb61dbb4e12f0`,
+    entryPointAddress: entryPointAddress,
     bundler: 'https://sepolia.voltaire.candidewallet.com/rpc',
     baseAsset: {
       symbol: 'ETH',

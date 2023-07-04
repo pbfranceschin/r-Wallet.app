@@ -226,7 +226,7 @@ export const useAccountTokens = (accountAdress: string | undefined) : number[] |
 }
 
 export const useMktPlaceAssets = () : any[] => {
-  const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
+  // const dummy1 = '0x099A294Bffb99Cb2350A6b6cA802712D9C96676A';
   const [assets, setAssets] = useState<any[]>([]);
   const [contractAddress, contractABI] = getMktPlaceData();
   console.log('mktplaceAddress',contractAddress);

@@ -45,11 +45,11 @@ export const CardGrid = ({
             setTokens(_mktPlace);
         else setError('error: missing context')
         console.log('tokens', tokens);
-    });
+    }, [context, _owned, _borrowed, _mktPlace]);
     if(tokens){
         return (
             tokens.map((t: any, i: number) => {
-                
+                console.log('index', i)
                 return ( 
                     <div className={styles['card-grid-container']} key={i}>
                         {context=='owned' && 

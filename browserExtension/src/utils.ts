@@ -1,9 +1,9 @@
 import { ethers } from "ethers";
 import { Provider } from '@ethersproject/providers';
 import axios, { AxiosInstance } from 'axios';
-import NFT from "./NFT.json";
-import MarketPlace from "./MarketPlace.json";
-import BaseMarketPlace from "./BaseMarketPlace.json";
+// import MarketPlace from "./MarketPlace.json";
+// import BaseMarketPlace from "./BaseMarketPlace.json";
+import contracts from "../contracts/hardhat_contracts.json";
 import { ContractInterface, Contract } from '@ethersproject/contracts';
 import { erc721ABI } from "wagmi";
 
@@ -12,17 +12,20 @@ interface NFT {
   abi: ContractInterface;
 }
 
-const contractAddress: string = NFT.address;
-const contractABI: ContractInterface = NFT.abi;
-const mktPlaceAddress: string = BaseMarketPlace.address;
-const mktPlaceAbi: ContractInterface = BaseMarketPlace.abi; 
+const networkId = 11155111; // sepolia
+// const contractAddress: string = NFT.address;
+// const contractABI: ContractInterface = NFT.abi;
+const nftAddress: string = contracts[networkId][0].contracts.NFT.address;
+const nftAbi: ContractInterface = contracts[networkId][0].contracts.NFT.abi;
+const mktPlaceAddress: string = contracts[networkId][0].contracts.BaseMarketPlace.address;
+const mktPlaceAbi: ContractInterface = contracts[networkId][0].contracts.BaseMarketPlace.abi; 
 
 export const getMktPlaceData = () => {
   return [mktPlaceAddress, mktPlaceAbi];
 }
 
 export const getContractData = (): [string, ContractInterface] => {
-  return [contractAddress, contractABI];
+  return [nftAddress, nftAbi];
 };
 
 // receives an ethers provider and returns a contract instance
@@ -41,8 +44,8 @@ export const ipfsToHTTP = (ipfsName: string) => {
   return ipfsName
 }
 
-export const getTokenMetadata = async (provider: Provider, tokenId: number) => {
-  const nftContract = getEthersNftContract(provider)
+export const getTokenMetadata = async (provider: Provider, address: string, tokenId: number) => {
+  const nftContract = getEthersNftContract(address, provider)
   const tokenUri = await nftContract.tokenURI(tokenId)
   return axios.get(ipfsToHTTP(tokenUri))
 }
